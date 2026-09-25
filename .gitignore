@@ -19,3 +19,7 @@
 *.bak
 _ReSharper*/
 *.rsuser
+
+# Ignore local application settings containing sensitive secrets
+appsettings.json
+appsettings.Development.json
