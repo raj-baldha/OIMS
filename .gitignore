@@ -1,0 +1,21 @@
+# Build directories (matches 'bin' or 'Bin' at any level)
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio user-specific files and folders
+.vs/
+*.user
+*.userprefs
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Diagnostic files
+*.pidb
+*.log
+*.sqlite
+
+# Backup/Temporary files
+*.bak
+_ReSharper*/
+*.rsuser

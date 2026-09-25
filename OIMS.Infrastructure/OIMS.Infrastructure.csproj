@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>6884a5c6-ecff-45d6-8e66-c87bb2aa471e</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OIMS.Application\OIMS.Application.csproj" />
+    <ProjectReference Include="..\OIMS.Data\OIMS.Data.csproj" />
+    <ProjectReference Include="..\OIMS.Domain\OIMS.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="EmailTemplate\" />
+  </ItemGroup>
+
+    <ItemGroup>
+	    <None Update="EmailTemplate\**\*.html">
+		    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	    </None>
+    </ItemGroup>
+	
+  <ItemGroup>
+    <PackageReference Include="MailKit" Version="4.18.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
+  </ItemGroup>
+
+</Project>

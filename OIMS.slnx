@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="OIMS.API/OIMS.API.csproj" />
+  <Project Path="OIMS.Application/OIMS.Application.csproj" />
+  <Project Path="OIMS.Data/OIMS.Data.csproj" />
+  <Project Path="OIMS.Domain/OIMS.Domain.csproj" />
+  <Project Path="OIMS.Infrastructure/OIMS.Infrastructure.csproj" />
+</Solution>

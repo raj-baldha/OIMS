@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\OIMS.Data\OIMS.Data.csproj" />
+		<ProjectReference Include="..\OIMS.Domain\OIMS.Domain.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AutoMapper" Version="16.2.0" />
+		<PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
+		<PackageReference Include="QuestPDF" Version="2026.9.0" />
+	</ItemGroup>
+
+</Project>
