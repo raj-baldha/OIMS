@@ -1,8 +1,8 @@
-﻿using OIMS.Domain.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using OIMS.Domain.Enums;
 
 namespace OIMS.Domain.Entities
 {
@@ -69,7 +69,9 @@ namespace OIMS.Domain.Entities
 
         public virtual Payment? Payment { get; set; }
         public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
-        public virtual ICollection<OrderStatusHistory> OrderStatusHistories { get; set; } = new List<OrderStatusHistory>();
-        public virtual ICollection<OrderDocument> OrderDocuments { get; set; } = new List<OrderDocument>();
+        public virtual ICollection<OrderStatusHistory> OrderStatusHistories { get; set; } =
+            new List<OrderStatusHistory>();
+        public virtual ICollection<OrderDocument> OrderDocuments { get; set; } =
+            new List<OrderDocument>();
     }
 }

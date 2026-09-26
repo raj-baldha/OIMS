@@ -1,8 +1,8 @@
-﻿using OIMS.Application.Interfaces.Helpers;
-using BC = BCrypt.Net.BCrypt;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using OIMS.Application.Interfaces.Helpers;
+using BC = BCrypt.Net.BCrypt;
 
 namespace OIMS.Infrastructure.Helpers
 {

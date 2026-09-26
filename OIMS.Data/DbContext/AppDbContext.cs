@@ -6,9 +6,8 @@ namespace OIMS.Data.DbContext
 {
     public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-        {
-        }
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+            : base(options) { }
 
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Customer> Customers { get; set; } = null!;
@@ -30,31 +29,20 @@ namespace OIMS.Data.DbContext
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.Username)
-                .IsUnique();
+            modelBuilder.Entity<User>().HasIndex(u => u.Username).IsUnique();
 
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.Email)
-                .IsUnique();
+            modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
 
-            modelBuilder.Entity<Customer>()
-                .HasIndex(c => c.Id)
-                .IsUnique();
+            modelBuilder.Entity<Customer>().HasIndex(c => c.Id).IsUnique();
 
-            modelBuilder.Entity<Category>()
-                .HasIndex(c => c.Name)
-                .IsUnique();
+            modelBuilder.Entity<Category>().HasIndex(c => c.Name).IsUnique();
 
-            modelBuilder.Entity<Product>()
-                .HasIndex(p => p.Sku)
-                .IsUnique();
+            modelBuilder.Entity<Product>().HasIndex(p => p.Sku).IsUnique();
 
-            modelBuilder.Entity<Payment>()
-                .HasIndex(p => p.OrderId)
-                .IsUnique();
+            modelBuilder.Entity<Payment>().HasIndex(p => p.OrderId).IsUnique();
 
-            modelBuilder.Entity<Payment>()
+            modelBuilder
+                .Entity<Payment>()
                 .HasOne(p => p.Order)
                 .WithOne(o => o.Payment)
                 .HasForeignKey<Payment>(p => p.OrderId)

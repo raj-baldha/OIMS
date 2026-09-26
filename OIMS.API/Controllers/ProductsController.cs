@@ -14,7 +14,6 @@ namespace OIMS.API.Controllers
     [ApiController]
     //[Authorize(Roles = "Administrator,Manager,Employee")]
     [Authorize(Policy = "CanManageProducts")]
-
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
@@ -22,7 +21,8 @@ namespace OIMS.API.Controllers
 
         public ProductsController(
             IProductService productService,
-            IValidator<CreateProductRequestDto> createProductValidator)
+            IValidator<CreateProductRequestDto> createProductValidator
+        )
         {
             _productService = productService;
             _createProductValidator = createProductValidator;
@@ -34,9 +34,7 @@ namespace OIMS.API.Controllers
             var validationResult = await _createProductValidator.ValidateAsync(request);
             if (!validationResult.IsValid)
             {
-                var errors = validationResult.Errors
-                    .Select(x => x.ErrorMessage)
-                    .ToList();
+                var errors = validationResult.Errors.Select(x => x.ErrorMessage).ToList();
 
                 throw new BadRequestException("Validation failed.", errors);
             }
@@ -45,31 +43,46 @@ namespace OIMS.API.Controllers
 
             var product = await _productService.CreateProductAsync(request, userId);
 
-            var response = ApiResponse<CreatedProductResponseDto>.SuccessResponse(product,"Product created successfully.");
+            var response = ApiResponse<CreatedProductResponseDto>.SuccessResponse(
+                product,
+                "Product created successfully."
+            );
 
             return StatusCode(StatusCodes.Status201Created, response);
         }
 
         [HttpPut("{productId:int}")]
-        public async Task<IActionResult> UpdateProduct(int productId,UpdateProductRequestDto request)
+        public async Task<IActionResult> UpdateProduct(
+            int productId,
+            UpdateProductRequestDto request
+        )
         {
             int userId = ClaimHelper.GetUserId(User);
 
-            var product = await _productService.UpdateProductAsync(productId,request,userId);
+            var product = await _productService.UpdateProductAsync(productId, request, userId);
 
-            var response = ApiResponse<CreatedProductResponseDto>.SuccessResponse(product,"Product updated successfully.");
+            var response = ApiResponse<CreatedProductResponseDto>.SuccessResponse(
+                product,
+                "Product updated successfully."
+            );
 
             return Ok(response);
         }
 
         [HttpPost("{productId:int}/inventory-adjustment")]
-        public async Task<IActionResult> AdjustInventory(int productId,AdjustInventoryRequestDto request)
+        public async Task<IActionResult> AdjustInventory(
+            int productId,
+            AdjustInventoryRequestDto request
+        )
         {
             int userId = ClaimHelper.GetUserId(User);
 
-            var product = await _productService.AdjustInventoryAsync(productId,request,userId);
+            var product = await _productService.AdjustInventoryAsync(productId, request, userId);
 
-            var response = ApiResponse<CreatedProductResponseDto>.SuccessResponse(product,"Inventory adjusted successfully.");
+            var response = ApiResponse<CreatedProductResponseDto>.SuccessResponse(
+                product,
+                "Inventory adjusted successfully."
+            );
 
             return Ok(response);
         }
@@ -79,9 +92,12 @@ namespace OIMS.API.Controllers
         {
             int userId = ClaimHelper.GetUserId(User);
 
-            var product = await _productService.DeactivateProductAsync(productId,userId);
+            var product = await _productService.DeactivateProductAsync(productId, userId);
 
-            var response = ApiResponse<DeactivatedProductResponseDto>.SuccessResponse(product,"Product deactivated successfully.");
+            var response = ApiResponse<DeactivatedProductResponseDto>.SuccessResponse(
+                product,
+                "Product deactivated successfully."
+            );
 
             return Ok(response);
         }
@@ -91,7 +107,10 @@ namespace OIMS.API.Controllers
         {
             var products = await _productService.GetProductsAsync(request);
 
-            var response = ApiResponse<PagedResponseDto<ProductListResponseDto>>.SuccessResponse(products,"Products retrieved successfully.");
+            var response = ApiResponse<PagedResponseDto<ProductListResponseDto>>.SuccessResponse(
+                products,
+                "Products retrieved successfully."
+            );
 
             return Ok(response);
         }

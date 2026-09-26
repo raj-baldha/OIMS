@@ -19,7 +19,8 @@ namespace OIMS.Application.Services
             IUserRepository userRepository,
             IPasswordHelper passwordHelper,
             IJwtHelper jwtHelper,
-            IMapper mapper)
+            IMapper mapper
+        )
         {
             _userRepository = userRepository;
             _passwordHelper = passwordHelper;
@@ -41,14 +42,17 @@ namespace OIMS.Application.Services
                 throw new UnauthorizedException("Your account is inactive.");
             }
 
-            bool isPasswordValid = _passwordHelper.VerifyPassword(request.Password,user.PasswordHash);
+            bool isPasswordValid = _passwordHelper.VerifyPassword(
+                request.Password,
+                user.PasswordHash
+            );
 
             if (!isPasswordValid)
             {
                 throw new UnauthorizedException("Invalid email or password.");
             }
 
-            string token = _jwtHelper.GenerateToken(user.Id,user.Email,user.Role);
+            string token = _jwtHelper.GenerateToken(user.Id, user.Email, user.Role);
 
             var response = _mapper.Map<LoginResponseDto>(user);
 

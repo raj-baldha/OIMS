@@ -17,7 +17,8 @@ namespace OIMS.Application.Services
         public UserService(
             IUserRepository userRepository,
             IPasswordHelper passwordHelper,
-            IEmailService emailService)
+            IEmailService emailService
+        )
         {
             _userRepository = userRepository;
             _passwordHelper = passwordHelper;
@@ -33,21 +34,17 @@ namespace OIMS.Application.Services
                 throw new ConflictException("Email already exists.");
             }
 
-            var allowedRoles = new[]
-            {
-                "Administrator",
-                "Manager",
-                "Employee"
-            };
+            var allowedRoles = new[] { "Administrator", "Manager", "Employee" };
 
-            var role = allowedRoles.FirstOrDefault(
-                x => x.Equals(
-                    request.Role,
-                    StringComparison.OrdinalIgnoreCase));
+            var role = allowedRoles.FirstOrDefault(x =>
+                x.Equals(request.Role, StringComparison.OrdinalIgnoreCase)
+            );
 
             if (role == null)
             {
-                throw new BadRequestException("Invalid role. Allowed roles are Administrator, Manager and Employee.");
+                throw new BadRequestException(
+                    "Invalid role. Allowed roles are Administrator, Manager and Employee."
+                );
             }
 
             string passwordHash = _passwordHelper.HashPassword(request.Password);
@@ -60,7 +57,7 @@ namespace OIMS.Application.Services
                 Role = role,
                 IsActive = true,
                 IsDeleted = false,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
             };
 
             await _userRepository.AddAsync(user);
@@ -69,20 +66,17 @@ namespace OIMS.Application.Services
             var templatePath = Path.Combine(
                 AppContext.BaseDirectory,
                 "EmailTemplate",
-                "WelcomeEmail.html");
+                "WelcomeEmail.html"
+            );
 
             var body = await File.ReadAllTextAsync(templatePath);
 
-            body = body
-                .Replace("{{Username}}", user.Username)
+            body = body.Replace("{{Username}}", user.Username)
                 .Replace("{{Email}}", user.Email)
                 .Replace("{{Role}}", user.Role)
                 .Replace("{{Password}}", request.Password);
 
-            await _emailService.SendEmailAsync(
-                user.Email,
-                "Welcome to OIMS",
-                body);
+            await _emailService.SendEmailAsync(user.Email, "Welcome to OIMS", body);
 
             return new CreatedUserResponseDto
             {
@@ -91,7 +85,7 @@ namespace OIMS.Application.Services
                 Email = user.Email,
                 Role = user.Role,
                 IsActive = user.IsActive,
-                CreatedAt = user.CreatedAt
+                CreatedAt = user.CreatedAt,
             };
         }
     }

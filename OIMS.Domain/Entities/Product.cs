@@ -77,13 +77,12 @@ namespace OIMS.Domain.Entities
         [ForeignKey("CategoryId")]
         public virtual Category? Category { get; set; }
 
-        public virtual ICollection<ProductImage> ProductImages { get; set; }
-            = new List<ProductImage>();
+        public virtual ICollection<ProductImage> ProductImages { get; set; } =
+            new List<ProductImage>();
 
-        public virtual ICollection<InventoryTransaction> InventoryTransactions { get; set; }
-            = new List<InventoryTransaction>();
+        public virtual ICollection<InventoryTransaction> InventoryTransactions { get; set; } =
+            new List<InventoryTransaction>();
 
-        public virtual ICollection<OrderItem> OrderItems { get; set; }
-            = new List<OrderItem>();
+        public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 }

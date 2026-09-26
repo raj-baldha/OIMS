@@ -1,7 +1,7 @@
-﻿using OIMS.Domain.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using OIMS.Domain.Entities;
 
 namespace OIMS.Application.Interfaces.Repositories
 {

@@ -5,6 +5,6 @@
         CashOnDelivery = 1,
         Card = 2,
         UPI = 3,
-        NetBanking = 4
+        NetBanking = 4,
     }
 }

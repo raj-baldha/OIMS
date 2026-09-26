@@ -19,22 +19,15 @@ namespace OIMS.Infrastructure.Repositories
 
         public async Task<Customer?> GetCustomerAsync(int customerId)
         {
-            return await _context.Customers
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x =>
-                    x.Id == customerId &&
-                    !x.IsDeleted &&
-                    x.IsActive);
+            return await _context
+                .Customers.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == customerId && !x.IsDeleted && x.IsActive);
         }
 
-        public async Task<List<Product>> GetProductsAsync(
-            List<int> productIds)
+        public async Task<List<Product>> GetProductsAsync(List<int> productIds)
         {
-            return await _context.Products
-                .Where(x =>
-                    productIds.Contains(x.Id) &&
-                    !x.IsDeleted &&
-                    x.IsActive)
+            return await _context
+                .Products.Where(x => productIds.Contains(x.Id) && !x.IsDeleted && x.IsActive)
                 .ToListAsync();
         }
 
@@ -43,11 +36,9 @@ namespace OIMS.Infrastructure.Repositories
             await _context.Orders.AddAsync(order);
         }
 
-        public async Task AddInventoryTransactionsAsync(
-            List<InventoryTransaction> transactions)
+        public async Task AddInventoryTransactionsAsync(List<InventoryTransaction> transactions)
         {
-            await _context.InventoryTransactions
-                .AddRangeAsync(transactions);
+            await _context.InventoryTransactions.AddRangeAsync(transactions);
         }
 
         public async Task AddAuditLogAsync(AuditLog auditLog)
@@ -87,28 +78,24 @@ namespace OIMS.Infrastructure.Repositories
 
         public async Task<Order?> GetOrderForStatusUpdateAsync(int orderId)
         {
-            return await _context.Orders
-                .Include(x => x.OrderItems)
+            return await _context
+                .Orders.Include(x => x.OrderItems)
                 .Include(x => x.Payment)
-                .FirstOrDefaultAsync(x =>
-                    x.Id == orderId &&
-                    !x.IsDeleted);
+                .FirstOrDefaultAsync(x => x.Id == orderId && !x.IsDeleted);
         }
 
         public async Task AddOrderStatusHistoryAsync(OrderStatusHistory statusHistory)
         {
-            await _context.OrderStatusHistories
-                .AddAsync(statusHistory);
+            await _context.OrderStatusHistories.AddAsync(statusHistory);
         }
 
         public async Task<(List<OrderListResponseDto> Data, int TotalRecords)> GetOrdersAsync(
-        GetOrdersRequestDto request,
-        int pageSize,
-        int? customerId)
+            GetOrdersRequestDto request,
+            int pageSize,
+            int? customerId
+        )
         {
-            var query = _context.Orders
-                .AsNoTracking()
-                .Where(x => !x.IsDeleted);
+            var query = _context.Orders.AsNoTracking().Where(x => !x.IsDeleted);
 
             if (customerId.HasValue)
             {
@@ -122,22 +109,26 @@ namespace OIMS.Infrastructure.Repositories
                 if (int.TryParse(search, out int orderId))
                 {
                     query = query.Where(x =>
-                        x.Id == orderId ||
-                        x.Customer!.FirstName.Contains(search) ||
-                        x.Customer.LastName.Contains(search) ||
-                        x.Customer.Email.Contains(search));
+                        x.Id == orderId
+                        || x.Customer!.FirstName.Contains(search)
+                        || x.Customer.LastName.Contains(search)
+                        || x.Customer.Email.Contains(search)
+                    );
                 }
                 else
                 {
                     query = query.Where(x =>
-                        x.Customer!.FirstName.Contains(search) ||
-                        x.Customer.LastName.Contains(search) ||
-                        x.Customer.Email.Contains(search));
+                        x.Customer!.FirstName.Contains(search)
+                        || x.Customer.LastName.Contains(search)
+                        || x.Customer.Email.Contains(search)
+                    );
                 }
             }
 
-            if (!string.IsNullOrWhiteSpace(request.Status) &&
-                Enum.TryParse<OrderStatus>(request.Status, ignoreCase: true, out var status))
+            if (
+                !string.IsNullOrWhiteSpace(request.Status)
+                && Enum.TryParse<OrderStatus>(request.Status, ignoreCase: true, out var status)
+            )
             {
                 query = query.Where(x => x.Status == status);
             }
@@ -145,7 +136,11 @@ namespace OIMS.Infrastructure.Repositories
             int totalRecords = await query.CountAsync();
 
             string sortBy = request.SortBy?.ToLowerInvariant() ?? "orderdate";
-            bool isAscending = string.Equals(request.SortOrder, "asc", StringComparison.OrdinalIgnoreCase);
+            bool isAscending = string.Equals(
+                request.SortOrder,
+                "asc",
+                StringComparison.OrdinalIgnoreCase
+            );
 
             query = (sortBy, isAscending) switch
             {
@@ -156,7 +151,7 @@ namespace OIMS.Infrastructure.Repositories
                 ("status", true) => query.OrderBy(x => x.Status),
                 ("status", false) => query.OrderByDescending(x => x.Status),
                 (_, true) => query.OrderBy(x => x.OrderDate),
-                _ => query.OrderByDescending(x => x.OrderDate)
+                _ => query.OrderByDescending(x => x.OrderDate),
             };
 
             int page = request.Page < 1 ? 1 : request.Page;
@@ -170,9 +165,10 @@ namespace OIMS.Infrastructure.Repositories
                 {
                     Id = x.Id,
                     CustomerId = x.CustomerId,
-                    CustomerName = x.Customer != null
-                        ? $"{x.Customer.FirstName} {x.Customer.LastName}".Trim()
-                        : string.Empty,
+                    CustomerName =
+                        x.Customer != null
+                            ? $"{x.Customer.FirstName} {x.Customer.LastName}".Trim()
+                            : string.Empty,
                     CustomerEmail = x.Customer != null ? x.Customer.Email : string.Empty,
                     OrderDate = x.OrderDate,
                     Status = x.Status.ToString(),
@@ -180,18 +176,19 @@ namespace OIMS.Infrastructure.Repositories
                     DiscountAmount = x.DiscountAmount,
                     TotalAmount = x.TotalAmount,
                     ShippingAddress = x.ShippingAddress,
-                    Payment = x.Payment == null
-                        ? null
-                        : new PaymentOrderResponseDto
-                        {
-                            Id = x.Payment.Id,
-                            Amount = x.Payment.Amount,
-                            PaymentMethod = x.Payment.PaymentMethod.ToString(),
-                            PaymentStatus = x.Payment.PaymentStatus.ToString(),
-                            PaidAt = x.Payment.PaidAt
-                        },
-                    Items = x.OrderItems
-                        .Where(item => !item.IsDeleted)
+                    Payment =
+                        x.Payment == null
+                            ? null
+                            : new PaymentOrderResponseDto
+                            {
+                                Id = x.Payment.Id,
+                                Amount = x.Payment.Amount,
+                                PaymentMethod = x.Payment.PaymentMethod.ToString(),
+                                PaymentStatus = x.Payment.PaymentStatus.ToString(),
+                                PaidAt = x.Payment.PaidAt,
+                            },
+                    Items = x
+                        .OrderItems.Where(item => !item.IsDeleted)
                         .Select(item => new OrderItemResponseDto
                         {
                             Id = item.Id,
@@ -200,9 +197,9 @@ namespace OIMS.Infrastructure.Repositories
                             Sku = item.Product != null ? item.Product.Sku : string.Empty,
                             Quantity = item.Quantity,
                             UnitPrice = item.UnitPrice,
-                            LineTotal = item.LineTotal
+                            LineTotal = item.LineTotal,
                         })
-                        .ToList()
+                        .ToList(),
                 })
                 .ToListAsync();
 
@@ -211,15 +208,13 @@ namespace OIMS.Infrastructure.Repositories
 
         public async Task<Order?> GetOrderForInvoiceAsync(int orderId)
         {
-            return await _context.Orders
-                .AsNoTracking()
+            return await _context
+                .Orders.AsNoTracking()
                 .Include(x => x.Customer)
                 .Include(x => x.Payment)
                 .Include(x => x.OrderItems)
                     .ThenInclude(x => x.Product)
-                .FirstOrDefaultAsync(x =>
-                    x.Id == orderId &&
-                    !x.IsDeleted);
+                .FirstOrDefaultAsync(x => x.Id == orderId && !x.IsDeleted);
         }
 
         public async Task AddOrderDocumentAsync(OrderDocument orderDocument)

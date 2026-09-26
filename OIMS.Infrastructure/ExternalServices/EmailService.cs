@@ -15,39 +15,29 @@ namespace OIMS.Infrastructure.ExternalServices
             _configuration = configuration;
         }
 
-        public async Task SendEmailAsync(
-            string toEmail,
-            string subject,
-            string body)
+        public async Task SendEmailAsync(string toEmail, string subject, string body)
         {
             var settings = _configuration.GetSection("EmailSettings");
 
             var email = new MimeMessage();
 
-            email.From.Add(
-                new MailboxAddress(
-                    settings["SenderName"]!,
-                    settings["SenderEmail"]!));
+            email.From.Add(new MailboxAddress(settings["SenderName"]!, settings["SenderEmail"]!));
 
             email.To.Add(MailboxAddress.Parse(toEmail));
 
             email.Subject = subject;
 
-            email.Body = new TextPart("html")
-            {
-                Text = body
-            };
+            email.Body = new TextPart("html") { Text = body };
 
             using var smtp = new SmtpClient();
 
             await smtp.ConnectAsync(
                 settings["SmtpServer"]!,
                 int.Parse(settings["Port"]!),
-                SecureSocketOptions.StartTls);
+                SecureSocketOptions.StartTls
+            );
 
-            await smtp.AuthenticateAsync(
-                settings["SenderEmail"]!,
-                settings["Password"]!);
+            await smtp.AuthenticateAsync(settings["SenderEmail"]!, settings["Password"]!);
 
             await smtp.SendAsync(email);
 

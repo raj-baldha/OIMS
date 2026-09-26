@@ -19,14 +19,11 @@ namespace OIMS.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<List<LowStockProductResponseDto>>GetLowStockProductsAsync()
+        public async Task<List<LowStockProductResponseDto>> GetLowStockProductsAsync()
         {
-            return await _context.Products
-                .AsNoTracking()
-                .Where(x =>
-                    !x.IsDeleted &&
-                    x.IsActive &&
-                    x.QuantityOnHand <= x.MinStockLevel)
+            return await _context
+                .Products.AsNoTracking()
+                .Where(x => !x.IsDeleted && x.IsActive && x.QuantityOnHand <= x.MinStockLevel)
                 .OrderBy(x => x.QuantityOnHand)
                 .Select(x => new LowStockProductResponseDto
                 {
@@ -35,41 +32,40 @@ namespace OIMS.Infrastructure.Repositories
                     Sku = x.Sku,
                     CategoryId = x.CategoryId,
 
-                    CategoryName = x.Category != null
-                        ? x.Category.Name
-                        : string.Empty,
+                    CategoryName = x.Category != null ? x.Category.Name : string.Empty,
 
                     QuantityOnHand = x.QuantityOnHand,
                     MinStockLevel = x.MinStockLevel,
 
-                    Shortage =
-                        x.MinStockLevel - x.QuantityOnHand,
+                    Shortage = x.MinStockLevel - x.QuantityOnHand,
 
-                    IsActive = x.IsActive
+                    IsActive = x.IsActive,
                 })
                 .ToListAsync();
         }
 
         public async Task<bool> ProductExistsAsync(int productId)
         {
-            return await _context.Products
-                .AnyAsync(x =>
-                    x.Id == productId &&
-                    !x.IsDeleted);
+            return await _context.Products.AnyAsync(x => x.Id == productId && !x.IsDeleted);
         }
 
-        public async Task<(List<InventoryHistoryResponseDto> Data, int TotalRecords)> GetInventoryHistoryAsync(int productId,GetInventoryHistoryRequestDto request,int pageSize)
+        public async Task<(
+            List<InventoryHistoryResponseDto> Data,
+            int TotalRecords
+        )> GetInventoryHistoryAsync(
+            int productId,
+            GetInventoryHistoryRequestDto request,
+            int pageSize
+        )
         {
-            var query = _context.InventoryTransactions
-                .AsNoTracking()
+            var query = _context
+                .InventoryTransactions.AsNoTracking()
                 .Where(x => x.ProductId == productId)
                 .AsQueryable();
 
             int totalRecords = await query.CountAsync();
 
-            int page = request.Page < 1
-                ? 1
-                : request.Page;
+            int page = request.Page < 1 ? 1 : request.Page;
 
             int skip = (page - 1) * pageSize;
 
@@ -89,11 +85,9 @@ namespace OIMS.Infrastructure.Repositories
                     QuantityAfter = x.QuantityAfter,
                     Notes = x.Notes,
                     CreatedBy = x.CreatedBy,
-                    CreatedByName = x.Creator != null
-                        ? x.Creator.Username
-                        : null,
+                    CreatedByName = x.Creator != null ? x.Creator.Username : null,
 
-                    CreatedAt = x.CreatedAt
+                    CreatedAt = x.CreatedAt,
                 })
                 .ToListAsync();
 

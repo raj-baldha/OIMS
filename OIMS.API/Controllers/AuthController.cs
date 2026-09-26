@@ -14,9 +14,7 @@ namespace OIMS.API.Controllers
         private readonly IAuthService _authService;
         private readonly IConfiguration _configuration;
 
-        public AuthController(
-            IAuthService authService,
-            IConfiguration configuration)
+        public AuthController(IAuthService authService, IConfiguration configuration)
         {
             _authService = authService;
             _configuration = configuration;
@@ -27,19 +25,22 @@ namespace OIMS.API.Controllers
         {
             var result = await _authService.LoginAsync(request);
 
-            CookieHelper.SetAccessTokenCookie(Response,_configuration,result.Token);
+            CookieHelper.SetAccessTokenCookie(Response, _configuration, result.Token);
 
-            var response =ApiResponse<LoginResponseDto>.SuccessResponse(result.User,"Login successful.");
+            var response = ApiResponse<LoginResponseDto>.SuccessResponse(
+                result.User,
+                "Login successful."
+            );
 
             return Ok(response);
         }
 
         [HttpPost("logout")]
         public IActionResult Logout()
-        {   
+        {
             CookieHelper.ClearAccessTokenCookie(Response);
 
-            var response = ApiResponse<object>.SuccessResponse(null!,"Logout successful.");
+            var response = ApiResponse<object>.SuccessResponse(null!, "Logout successful.");
 
             return Ok(response);
         }

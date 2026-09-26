@@ -15,8 +15,7 @@ namespace OIMS.API.Controllers
     {
         private readonly IProductImageService _productImageService;
 
-        public ProductImageController(
-            IProductImageService productImageService)
+        public ProductImageController(IProductImageService productImageService)
         {
             _productImageService = productImageService;
         }
@@ -24,20 +23,17 @@ namespace OIMS.API.Controllers
         [HttpPost]
         public async Task<IActionResult> UploadImages(
             int productId,
-            [FromForm] List<IFormFile> files)
+            [FromForm] List<IFormFile> files
+        )
         {
             int userId = ClaimHelper.GetUserId(User);
 
-            var result = await _productImageService.UploadImagesAsync(
-                productId,
-                files,
-                userId);
+            var result = await _productImageService.UploadImagesAsync(productId, files, userId);
 
-            var response =
-                ApiResponse<List<ProductImageResponseDto>>
-                    .SuccessResponse(
-                        result,
-                        "Product images uploaded successfully.");
+            var response = ApiResponse<List<ProductImageResponseDto>>.SuccessResponse(
+                result,
+                "Product images uploaded successfully."
+            );
 
             return Ok(response);
         }

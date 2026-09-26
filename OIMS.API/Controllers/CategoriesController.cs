@@ -15,23 +15,24 @@ namespace OIMS.API.Controllers
     {
         private readonly ICategoryService _categoryService;
 
-        public CategoriesController(
-            ICategoryService categoryService)
+        public CategoriesController(ICategoryService categoryService)
         {
             _categoryService = categoryService;
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateCategory(
-            CreateCategoryRequestDto request)
+        public async Task<IActionResult> CreateCategory(CreateCategoryRequestDto request)
         {
             int userId = ClaimHelper.GetUserId(User);
 
-            var category = await _categoryService.CreateCategoryAsync(request,userId);
+            var category = await _categoryService.CreateCategoryAsync(request, userId);
 
-            var response = ApiResponse<CreatedCategoryResponseDto>.SuccessResponse(category,"Category created successfully.");
+            var response = ApiResponse<CreatedCategoryResponseDto>.SuccessResponse(
+                category,
+                "Category created successfully."
+            );
 
-            return StatusCode(StatusCodes.Status201Created,response);
+            return StatusCode(StatusCodes.Status201Created, response);
         }
     }
 }

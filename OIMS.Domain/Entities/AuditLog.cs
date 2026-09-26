@@ -17,7 +17,7 @@ namespace OIMS.Domain.Entities
         [Required]
         [StringLength(50)]
         [Column("action")]
-        public string Action { get; set; } = string.Empty; 
+        public string Action { get; set; } = string.Empty;
 
         [Required]
         [StringLength(100)]

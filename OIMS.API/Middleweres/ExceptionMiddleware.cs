@@ -14,15 +14,13 @@ public class ExceptionMiddleware
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
 
     private readonly RequestDelegate _next;
     private readonly ILogger<ExceptionMiddleware> _logger;
 
-    public ExceptionMiddleware(
-        RequestDelegate next,
-        ILogger<ExceptionMiddleware> logger)
+    public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
     {
         _next = next;
         _logger = logger;
@@ -41,7 +39,11 @@ public class ExceptionMiddleware
         }
     }
 
-    private async Task HandleExceptionAsync(HttpContext context,Exception ex,IApiExceptionLogRepository repository)
+    private async Task HandleExceptionAsync(
+        HttpContext context,
+        Exception ex,
+        IApiExceptionLogRepository repository
+    )
     {
         if (context.Response.HasStarted)
         {
@@ -70,7 +72,12 @@ public class ExceptionMiddleware
             message = "A database constraint was violated.";
             errors = ["Invalid reference or duplicate entry."];
         }
-        else if (ex.Message.Contains("The AuthorizationPolicy named:", StringComparison.OrdinalIgnoreCase))
+        else if (
+            ex.Message.Contains(
+                "The AuthorizationPolicy named:",
+                StringComparison.OrdinalIgnoreCase
+            )
+        )
         {
             statusCode = (int)HttpStatusCode.Forbidden;
             errorCode = "FORBIDDEN";
@@ -89,7 +96,7 @@ public class ExceptionMiddleware
             errorCode,
             message,
             errors,
-            timestamp = DateTime.UtcNow
+            timestamp = DateTime.UtcNow,
         };
 
         var json = JsonSerializer.Serialize(response, JsonOptions);
@@ -101,7 +108,8 @@ public class ExceptionMiddleware
         Exception ex,
         int statusCode,
         string errorCode,
-        IApiExceptionLogRepository repository)
+        IApiExceptionLogRepository repository
+    )
     {
         int? userId = null;
         if (context.User.Identity?.IsAuthenticated == true)
@@ -120,7 +128,7 @@ public class ExceptionMiddleware
             StackTrace = ex.StackTrace,
             StatusCode = statusCode,
             ErrorCode = errorCode,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
         };
 
         await repository.AddAsync(exceptionLog);

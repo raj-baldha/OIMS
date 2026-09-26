@@ -19,7 +19,10 @@ namespace OIMS.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<CreatedCategoryResponseDto>CreateCategoryAsync(CreateCategoryRequestDto request,int userId)
+        public async Task<CreatedCategoryResponseDto> CreateCategoryAsync(
+            CreateCategoryRequestDto request,
+            int userId
+        )
         {
             string name = request.Name.Trim();
 
@@ -35,7 +38,7 @@ namespace OIMS.Application.Services
                 Name = name,
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = userId,
-                IsDeleted = false
+                IsDeleted = false,
             };
 
             await _categoryRepository.AddAsync(category);

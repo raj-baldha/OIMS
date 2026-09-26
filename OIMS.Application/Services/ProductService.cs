@@ -21,7 +21,10 @@ namespace OIMS.Application.Services
             _configuration = configuration;
         }
 
-        public async Task<CreatedProductResponseDto>CreateProductAsync(CreateProductRequestDto request,int userId)
+        public async Task<CreatedProductResponseDto> CreateProductAsync(
+            CreateProductRequestDto request,
+            int userId
+        )
         {
             string sku = request.Sku.Trim();
 
@@ -32,7 +35,9 @@ namespace OIMS.Application.Services
                 throw new ConflictException("SKU already exists.");
             }
 
-            bool categoryExists = await _productRepository.IsCategoryExistsAsync(request.CategoryId);
+            bool categoryExists = await _productRepository.IsCategoryExistsAsync(
+                request.CategoryId
+            );
 
             if (!categoryExists)
             {
@@ -55,7 +60,7 @@ namespace OIMS.Application.Services
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = userId,
 
-                IsDeleted = false
+                IsDeleted = false,
             };
 
             await _productRepository.AddAsync(product);
@@ -73,11 +78,15 @@ namespace OIMS.Application.Services
                 MinStockLevel = product.MinStockLevel,
                 IsActive = product.IsActive,
                 CreatedAt = product.CreatedAt,
-                CreatedBy = product.CreatedBy
+                CreatedBy = product.CreatedBy,
             };
         }
 
-        public async Task<CreatedProductResponseDto>UpdateProductAsync(int productId,UpdateProductRequestDto request,int userId)
+        public async Task<CreatedProductResponseDto> UpdateProductAsync(
+            int productId,
+            UpdateProductRequestDto request,
+            int userId
+        )
         {
             var product = await _productRepository.GetByIdAsync(productId);
 
@@ -88,14 +97,19 @@ namespace OIMS.Application.Services
 
             string sku = request.Sku.Trim();
 
-            bool skuExists = await _productRepository.IsSkuExistsForOtherProductAsync(sku,productId);
+            bool skuExists = await _productRepository.IsSkuExistsForOtherProductAsync(
+                sku,
+                productId
+            );
 
             if (skuExists)
             {
                 throw new ConflictException("SKU already exists.");
             }
 
-            bool categoryExists = await _productRepository.IsCategoryExistsAsync(request.CategoryId);
+            bool categoryExists = await _productRepository.IsCategoryExistsAsync(
+                request.CategoryId
+            );
 
             if (!categoryExists)
             {
@@ -129,11 +143,15 @@ namespace OIMS.Application.Services
                 MinStockLevel = product.MinStockLevel,
                 IsActive = product.IsActive,
                 CreatedAt = product.CreatedAt,
-                CreatedBy = product.CreatedBy
+                CreatedBy = product.CreatedBy,
             };
         }
 
-        public async Task<CreatedProductResponseDto>AdjustInventoryAsync(int productId,AdjustInventoryRequestDto request,int userId)
+        public async Task<CreatedProductResponseDto> AdjustInventoryAsync(
+            int productId,
+            AdjustInventoryRequestDto request,
+            int userId
+        )
         {
             var product = await _productRepository.GetByIdForInventoryAsync(productId);
 
@@ -178,7 +196,7 @@ namespace OIMS.Application.Services
                 Notes = request.Notes?.Trim(),
 
                 CreatedBy = userId,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
             };
 
             await _productRepository.AddInventoryTransactionAsync(transaction);
@@ -197,11 +215,14 @@ namespace OIMS.Application.Services
                 MinStockLevel = product.MinStockLevel,
                 IsActive = product.IsActive,
                 CreatedAt = product.CreatedAt,
-                CreatedBy = product.CreatedBy
+                CreatedBy = product.CreatedBy,
             };
         }
 
-        public async Task<DeactivatedProductResponseDto>DeactivateProductAsync(int productId,int userId)
+        public async Task<DeactivatedProductResponseDto> DeactivateProductAsync(
+            int productId,
+            int userId
+        )
         {
             var product = await _productRepository.GetByIdAsync(productId);
 
@@ -231,11 +252,13 @@ namespace OIMS.Application.Services
                 Sku = product.Sku,
                 IsActive = product.IsActive,
                 UpdatedAt = product.UpdatedAt,
-                UpdatedBy = product.UpdatedBy
+                UpdatedBy = product.UpdatedBy,
             };
         }
 
-        public async Task<PagedResponseDto<ProductListResponseDto>>GetProductsAsync(GetProductsRequestDto request)
+        public async Task<PagedResponseDto<ProductListResponseDto>> GetProductsAsync(
+            GetProductsRequestDto request
+        )
         {
             int pageSize = int.Parse(_configuration["Pagination:PageSize"]!);
 
@@ -248,7 +271,7 @@ namespace OIMS.Application.Services
 
             request.Page = page;
 
-            var result = await _productRepository.GetProductsAsync(request,pageSize);
+            var result = await _productRepository.GetProductsAsync(request, pageSize);
 
             int totalPages = (int)Math.Ceiling(result.TotalRecords / (double)pageSize);
 
@@ -258,7 +281,7 @@ namespace OIMS.Application.Services
                 Page = page,
                 PageSize = pageSize,
                 TotalRecords = result.TotalRecords,
-                TotalPages = totalPages
+                TotalPages = totalPages,
             };
         }
     }

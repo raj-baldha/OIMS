@@ -14,7 +14,7 @@ namespace OIMS.Application.Services;
 public class OrderService : IOrderService
 {
     private readonly IOrderRepository _orderRepository;
-    private readonly IConfiguration _configuration; 
+    private readonly IConfiguration _configuration;
 
     public OrderService(IOrderRepository orderRepository, IConfiguration configuration)
     {
@@ -24,7 +24,8 @@ public class OrderService : IOrderService
 
     public async Task<CreatedOrderResponseDto> CreateOrderAsync(
         CreateOrderRequestDto request,
-        int customerId)
+        int customerId
+    )
     {
         var customer = await _orderRepository.GetCustomerAsync(customerId);
         if (customer is null)
@@ -42,14 +43,18 @@ public class OrderService : IOrderService
             throw new BadRequestException("Shipping address is required.");
         }
 
-        if (!Enum.TryParse<PaymentMethod>(request.PaymentMethod, ignoreCase: true, out var paymentMethod))
+        if (
+            !Enum.TryParse<PaymentMethod>(
+                request.PaymentMethod,
+                ignoreCase: true,
+                out var paymentMethod
+            )
+        )
         {
             throw new BadRequestException("Invalid payment method.");
         }
 
-        var productIds = request.Items
-            .Select(x => x.ProductId)
-            .ToList();
+        var productIds = request.Items.Select(x => x.ProductId).ToList();
 
         if (productIds.Count != productIds.Distinct().Count())
         {
@@ -88,32 +93,36 @@ public class OrderService : IOrderService
             decimal lineTotal = product.SellingPrice * requestItem.Quantity;
             subtotal += lineTotal;
 
-            orderItems.Add(new OrderItem
-            {
-                ProductId = product.Id,
-                Quantity = requestItem.Quantity,
-                UnitPrice = product.SellingPrice,
-                LineTotal = lineTotal,
-                CreatedAt = now,
-                IsDeleted = false
-            });
+            orderItems.Add(
+                new OrderItem
+                {
+                    ProductId = product.Id,
+                    Quantity = requestItem.Quantity,
+                    UnitPrice = product.SellingPrice,
+                    LineTotal = lineTotal,
+                    CreatedAt = now,
+                    IsDeleted = false,
+                }
+            );
 
             product.QuantityOnHand -= requestItem.Quantity;
             product.UpdatedAt = now;
             product.UpdatedBy = customerId;
             product.Version++;
 
-            inventoryTransactions.Add(new InventoryTransaction
-            {
-                ProductId = product.Id,
-                ChangeType = InventoryChangeType.OrderPlacement,
-                QuantityBefore = quantityBefore,
-                QuantityChange = -requestItem.Quantity,
-                QuantityAfter = product.QuantityOnHand,
-                Notes = "Stock decreased due to order placement.",
-                CreatedBy = customerId,
-                CreatedAt = now
-            });
+            inventoryTransactions.Add(
+                new InventoryTransaction
+                {
+                    ProductId = product.Id,
+                    ChangeType = InventoryChangeType.OrderPlacement,
+                    QuantityBefore = quantityBefore,
+                    QuantityChange = -requestItem.Quantity,
+                    QuantityAfter = product.QuantityOnHand,
+                    Notes = "Stock decreased due to order placement.",
+                    CreatedBy = customerId,
+                    CreatedAt = now,
+                }
+            );
         }
 
         const decimal discountAmount = 0m;
@@ -137,8 +146,8 @@ public class OrderService : IOrderService
                 PaymentMethod = paymentMethod,
                 PaymentStatus = PaymentStatus.Pending,
                 CreatedAt = now,
-                CreatedBy = customerId
-            }
+                CreatedBy = customerId,
+            },
         };
 
         foreach (var item in orderItems)
@@ -146,12 +155,14 @@ public class OrderService : IOrderService
             order.OrderItems.Add(item);
         }
 
-        order.OrderStatusHistories.Add(new OrderStatusHistory
-        {
-            Status = OrderStatus.Pending,
-            ChangedBy = customerId,
-            ChangedAt = now
-        });
+        order.OrderStatusHistories.Add(
+            new OrderStatusHistory
+            {
+                Status = OrderStatus.Pending,
+                ChangedBy = customerId,
+                ChangedAt = now,
+            }
+        );
 
         string? invoiceUrl = null;
 
@@ -175,15 +186,15 @@ public class OrderService : IOrderService
                 TotalAmount = order.TotalAmount,
                 PaymentMethod = order.Payment.PaymentMethod.ToString(),
                 PaymentStatus = order.Payment.PaymentStatus.ToString(),
-                Items = order.OrderItems
-                    .Select(x => new InvoiceItemDto
+                Items = order
+                    .OrderItems.Select(x => new InvoiceItemDto
                     {
                         ProductName = productLookup[x.ProductId].Name,
                         Quantity = x.Quantity,
                         UnitPrice = x.UnitPrice,
-                        LineTotal = x.LineTotal
+                        LineTotal = x.LineTotal,
                     })
-                    .ToList()
+                    .ToList(),
             };
 
             byte[] invoicePdf = InvoicePdfHelper.GenerateInvoicePdf(invoiceDto);
@@ -199,7 +210,7 @@ public class OrderService : IOrderService
                 FileSize = invoicePdf.Length,
                 CreatedAt = now,
                 CreatedBy = customerId,
-                IsDeleted = false
+                IsDeleted = false,
             };
 
             await _orderRepository.AddOrderDocumentAsync(orderDocument);
@@ -210,7 +221,7 @@ public class OrderService : IOrderService
                 Action = "Created",
                 EntityName = nameof(Order),
                 EntityId = order.Id,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
             };
 
             await _orderRepository.AddAuditLogAsync(auditLog);
@@ -228,9 +239,7 @@ public class OrderService : IOrderService
                 {
                     await FileStorageHelper.DeleteInvoiceAsync(invoiceUrl);
                 }
-                catch
-                {
-                }
+                catch { }
             }
 
             throw;
@@ -249,23 +258,24 @@ public class OrderService : IOrderService
             PaymentMethod = order.Payment.PaymentMethod.ToString(),
             PaymentStatus = order.Payment.PaymentStatus.ToString(),
             InvoiceUrl = invoiceUrl,
-            Items = order.OrderItems
-                .Select(x => new CreatedOrderItemResponseDto
+            Items = order
+                .OrderItems.Select(x => new CreatedOrderItemResponseDto
                 {
                     ProductId = x.ProductId,
                     ProductName = productLookup[x.ProductId].Name,
                     Quantity = x.Quantity,
                     UnitPrice = x.UnitPrice,
-                    LineTotal = x.LineTotal
+                    LineTotal = x.LineTotal,
                 })
-                .ToList()
+                .ToList(),
         };
     }
 
     public async Task UpdateOrderStatusAsync(
-    int orderId,
-    UpdateOrderStatusRequestDto request,
-    int userId)
+        int orderId,
+        UpdateOrderStatusRequestDto request,
+        int userId
+    )
     {
         var order = await _orderRepository.GetOrderForStatusUpdateAsync(orderId);
         if (order is null)
@@ -286,13 +296,14 @@ public class OrderService : IOrderService
             (OrderStatus.Confirmed, OrderStatus.Processing) => true,
             (OrderStatus.Processing, OrderStatus.Shipped) => true,
             (OrderStatus.Shipped, OrderStatus.Delivered) => true,
-            _ => false
+            _ => false,
         };
 
         if (!isValidTransition)
         {
             throw new BadRequestException(
-                $"Invalid order status transition from {currentStatus} to {newStatus}.");
+                $"Invalid order status transition from {currentStatus} to {newStatus}."
+            );
         }
 
         var now = DateTime.UtcNow;
@@ -306,17 +317,14 @@ public class OrderService : IOrderService
             OrderId = order.Id,
             Status = newStatus,
             ChangedBy = userId,
-            ChangedAt = now
+            ChangedAt = now,
         };
 
         await _orderRepository.AddOrderStatusHistoryAsync(statusHistory);
         await _orderRepository.SaveChangesAsync();
     }
 
-    public async Task CancelOrderAsync(
-    int orderId,
-    int userId,
-    string role)
+    public async Task CancelOrderAsync(int orderId, int userId, string role)
     {
         var order = await _orderRepository.GetOrderForStatusUpdateAsync(orderId);
         if (order is null)
@@ -324,8 +332,10 @@ public class OrderService : IOrderService
             throw new NotFoundException("Order not found.");
         }
 
-        if (string.Equals(role, "Customer", StringComparison.OrdinalIgnoreCase) &&
-            order.CustomerId != userId)
+        if (
+            string.Equals(role, "Customer", StringComparison.OrdinalIgnoreCase)
+            && order.CustomerId != userId
+        )
         {
             throw new ForbiddenException("You are not allowed to cancel this order.");
         }
@@ -346,7 +356,7 @@ public class OrderService : IOrderService
             OrderId = order.Id,
             Status = OrderStatus.Cancelled,
             ChangedBy = userId,
-            ChangedAt = now
+            ChangedAt = now,
         };
 
         await _orderRepository.AddOrderStatusHistoryAsync(statusHistory);
@@ -354,9 +364,10 @@ public class OrderService : IOrderService
     }
 
     public async Task<PagedResponseDto<OrderListResponseDto>> GetOrdersAsync(
-    GetOrdersRequestDto request,
-    int userId,
-    string role)
+        GetOrdersRequestDto request,
+        int userId,
+        string role
+    )
     {
         int? customerId = string.Equals(role, "Customer", StringComparison.OrdinalIgnoreCase)
             ? userId
@@ -364,10 +375,7 @@ public class OrderService : IOrderService
 
         int pageSize = int.Parse(_configuration["Pagination:PageSize"]!);
 
-        var result = await _orderRepository.GetOrdersAsync(
-            request,
-            pageSize,
-            customerId);
+        var result = await _orderRepository.GetOrdersAsync(request, pageSize, customerId);
 
         int page = request.Page < 1 ? 1 : request.Page;
         int totalPages = (int)Math.Ceiling((double)result.TotalRecords / pageSize);
@@ -378,7 +386,7 @@ public class OrderService : IOrderService
             Page = page,
             PageSize = pageSize,
             TotalRecords = result.TotalRecords,
-            TotalPages = totalPages
+            TotalPages = totalPages,
         };
     }
 }

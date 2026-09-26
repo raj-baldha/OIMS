@@ -62,7 +62,8 @@ namespace OIMS.Domain.Entities
 
         public virtual Customer? Customer { get; set; }
 
-        public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+        public virtual ICollection<Notification> Notifications { get; set; } =
+            new List<Notification>();
 
         public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
     }

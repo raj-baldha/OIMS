@@ -19,18 +19,12 @@ namespace OIMS.Infrastructure.Repositories
 
         public async Task<bool> IsSkuExistsAsync(string sku)
         {
-            return await _context.Products
-                .AnyAsync(x =>
-                    x.Sku == sku &&
-                    !x.IsDeleted);
+            return await _context.Products.AnyAsync(x => x.Sku == sku && !x.IsDeleted);
         }
 
         public async Task<bool> IsCategoryExistsAsync(int categoryId)
         {
-            return await _context.Categories
-                .AnyAsync(x =>
-                    x.Id == categoryId &&
-                    !x.IsDeleted);
+            return await _context.Categories.AnyAsync(x => x.Id == categoryId && !x.IsDeleted);
         }
 
         public async Task AddAsync(Product product)
@@ -45,27 +39,23 @@ namespace OIMS.Infrastructure.Repositories
 
         public async Task<Product?> GetByIdAsync(int productId)
         {
-            return await _context.Products
-                .FirstOrDefaultAsync(x =>
-                    x.Id == productId &&
-                    !x.IsDeleted);
+            return await _context.Products.FirstOrDefaultAsync(x =>
+                x.Id == productId && !x.IsDeleted
+            );
         }
 
-        public async Task<bool> IsSkuExistsForOtherProductAsync(string sku,int productId)
+        public async Task<bool> IsSkuExistsForOtherProductAsync(string sku, int productId)
         {
-            return await _context.Products
-                .AnyAsync(x =>
-                    x.Sku == sku &&
-                    x.Id != productId &&
-                    !x.IsDeleted);
+            return await _context.Products.AnyAsync(x =>
+                x.Sku == sku && x.Id != productId && !x.IsDeleted
+            );
         }
 
         public async Task<Product?> GetByIdForInventoryAsync(int productId)
         {
-            return await _context.Products
-                .FirstOrDefaultAsync(x =>
-                    x.Id == productId &&
-                    !x.IsDeleted);
+            return await _context.Products.FirstOrDefaultAsync(x =>
+                x.Id == productId && !x.IsDeleted
+            );
         }
 
         public async Task AddInventoryTransactionAsync(InventoryTransaction transaction)
@@ -73,55 +63,45 @@ namespace OIMS.Infrastructure.Repositories
             await _context.InventoryTransactions.AddAsync(transaction);
         }
 
-        public async Task<(List<ProductListResponseDto> Data, int TotalRecords)>GetProductsAsync(GetProductsRequestDto request,int pageSize)
+        public async Task<(List<ProductListResponseDto> Data, int TotalRecords)> GetProductsAsync(
+            GetProductsRequestDto request,
+            int pageSize
+        )
         {
-            var query = _context.Products
-                .AsNoTracking()
-                .Where(x => !x.IsDeleted)
-                .AsQueryable();
+            var query = _context.Products.AsNoTracking().Where(x => !x.IsDeleted).AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(request.Search))
             {
                 string search = request.Search.Trim();
 
-                query = query.Where(x =>
-                    x.Name.Contains(search) ||
-                    x.Sku.Contains(search));
+                query = query.Where(x => x.Name.Contains(search) || x.Sku.Contains(search));
             }
 
             if (request.CategoryId.HasValue)
             {
-                query = query.Where(x =>
-                    x.CategoryId == request.CategoryId.Value);
+                query = query.Where(x => x.CategoryId == request.CategoryId.Value);
             }
 
             if (request.IsActive.HasValue)
             {
-                query = query.Where(x =>
-                    x.IsActive == request.IsActive.Value);
+                query = query.Where(x => x.IsActive == request.IsActive.Value);
             }
 
             if (request.MinPrice.HasValue)
             {
-                query = query.Where(x =>
-                    x.SellingPrice >= request.MinPrice.Value);
+                query = query.Where(x => x.SellingPrice >= request.MinPrice.Value);
             }
 
             if (request.MaxPrice.HasValue)
             {
-                query = query.Where(x =>
-                    x.SellingPrice <= request.MaxPrice.Value);
+                query = query.Where(x => x.SellingPrice <= request.MaxPrice.Value);
             }
 
             int totalRecords = await query.CountAsync();
 
-            string sortBy =
-                request.SortBy?.Trim().ToLower()
-                ?? "name";
+            string sortBy = request.SortBy?.Trim().ToLower() ?? "name";
 
-            string sortOrder =
-                request.SortOrder?.Trim().ToLower()
-                ?? "asc";
+            string sortOrder = request.SortOrder?.Trim().ToLower() ?? "asc";
 
             bool descending = sortOrder == "desc";
 
@@ -139,9 +119,7 @@ namespace OIMS.Infrastructure.Repositories
                     ? query.OrderByDescending(x => x.Sku)
                     : query.OrderBy(x => x.Sku),
 
-                _ => descending
-                    ? query.OrderByDescending(x => x.Name)
-                    : query.OrderBy(x => x.Name)
+                _ => descending ? query.OrderByDescending(x => x.Name) : query.OrderBy(x => x.Name),
             };
 
             int page = request.Page < 1 ? 1 : request.Page;
@@ -158,13 +136,11 @@ namespace OIMS.Infrastructure.Repositories
                     Name = x.Name,
                     Sku = x.Sku,
                     CategoryId = x.CategoryId,
-                    CategoryName = x.Category != null
-                        ? x.Category.Name
-                        : string.Empty,
+                    CategoryName = x.Category != null ? x.Category.Name : string.Empty,
                     SellingPrice = x.SellingPrice,
                     QuantityOnHand = x.QuantityOnHand,
                     MinStockLevel = x.MinStockLevel,
-                    IsActive = x.IsActive
+                    IsActive = x.IsActive,
                 })
                 .ToListAsync();
 

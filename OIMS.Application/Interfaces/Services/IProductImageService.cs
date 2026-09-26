@@ -8,6 +8,7 @@ namespace OIMS.Application.Interfaces.Services
         Task<List<ProductImageResponseDto>> UploadImagesAsync(
             int productId,
             List<IFormFile> files,
-            int userId);
+            int userId
+        );
     }
 }

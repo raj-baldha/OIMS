@@ -13,19 +13,13 @@ public class ProductImageService : IProductImageService
     private const int MaxImagesPerProduct = 3;
     private const long MaxFileSize = 5 * 1024 * 1024;
 
-    private static readonly string[] AllowedExtensions =
-    [
-        ".jpg",
-        ".jpeg",
-        ".png",
-        ".webp"
-    ];
+    private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
 
     private static readonly string[] AllowedContentTypes =
     [
         "image/jpeg",
         "image/png",
-        "image/webp"
+        "image/webp",
     ];
 
     private readonly IProductImageRepository _productImageRepository;
@@ -38,7 +32,8 @@ public class ProductImageService : IProductImageService
     public async Task<List<ProductImageResponseDto>> UploadImagesAsync(
         int productId,
         List<IFormFile> files,
-        int userId)
+        int userId
+    )
     {
         var product = await _productImageRepository.GetProductAsync(productId);
         if (product is null)
@@ -54,7 +49,9 @@ public class ProductImageService : IProductImageService
         int existingImageCount = await _productImageRepository.GetImageCountAsync(productId);
         if (existingImageCount + files.Count > MaxImagesPerProduct)
         {
-            throw new BadRequestException($"A product can have a maximum of {MaxImagesPerProduct} images.");
+            throw new BadRequestException(
+                $"A product can have a maximum of {MaxImagesPerProduct} images."
+            );
         }
 
         var uploadedImages = new List<ProductImage>();
@@ -76,7 +73,7 @@ public class ProductImageService : IProductImageService
                 FileSize = file.Length,
                 CreatedAt = now,
                 CreatedBy = userId,
-                IsDeleted = false
+                IsDeleted = false,
             };
 
             uploadedImages.Add(productImage);
@@ -98,7 +95,7 @@ public class ProductImageService : IProductImageService
                 OriginalFileName = image.OriginalFileName,
                 ContentType = image.ContentType,
                 FileSize = image.FileSize,
-                CreatedAt = image.CreatedAt
+                CreatedAt = image.CreatedAt,
             })
             .ToList();
     }

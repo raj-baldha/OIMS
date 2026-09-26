@@ -6,6 +6,6 @@
         OrderPlacement = 2,
         OrderCancellation = 3,
         Return = 4,
-        Damage = 5
+        Damage = 5,
     }
 }

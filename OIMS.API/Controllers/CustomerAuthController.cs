@@ -16,7 +16,8 @@ namespace OIMS.API.Controllers
 
         public CustomerAuthController(
             ICustomerAuthService customerAuthService,
-            IConfiguration configuration)
+            IConfiguration configuration
+        )
         {
             _customerAuthService = customerAuthService;
             _configuration = configuration;
@@ -27,9 +28,12 @@ namespace OIMS.API.Controllers
         {
             var result = await _customerAuthService.LoginAsync(request);
 
-            CookieHelper.SetAccessTokenCookie(Response,_configuration,result.Token);
+            CookieHelper.SetAccessTokenCookie(Response, _configuration, result.Token);
 
-            var response = ApiResponse<CustomerLoginResponseDto>.SuccessResponse(result.Customer,"Customer login successful.");
+            var response = ApiResponse<CustomerLoginResponseDto>.SuccessResponse(
+                result.Customer,
+                "Customer login successful."
+            );
 
             return Ok(response);
         }
@@ -39,7 +43,10 @@ namespace OIMS.API.Controllers
         {
             CookieHelper.ClearAccessTokenCookie(Response);
 
-            var response = ApiResponse<object>.SuccessResponse(null!,"Customer logout successful.");
+            var response = ApiResponse<object>.SuccessResponse(
+                null!,
+                "Customer logout successful."
+            );
 
             return Ok(response);
         }

@@ -7,7 +7,7 @@ using OIMS.Application.DTOs.Response;
 using OIMS.Application.Interfaces.Services;
 
 namespace OIMS.API.Controllers
-{      
+{
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
@@ -25,9 +25,12 @@ namespace OIMS.API.Controllers
         {
             var user = await _userService.CreateUserAsync(request);
 
-            var response = ApiResponse<CreatedUserResponseDto>.SuccessResponse(user,"User created successfully.");
+            var response = ApiResponse<CreatedUserResponseDto>.SuccessResponse(
+                user,
+                "User created successfully."
+            );
 
-            return StatusCode(StatusCodes.Status201Created,response);
+            return StatusCode(StatusCodes.Status201Created, response);
         }
     }
 }

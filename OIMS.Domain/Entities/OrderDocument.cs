@@ -1,6 +1,6 @@
-﻿using OIMS.Domain.Entities;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using OIMS.Domain.Entities;
 
 [Table("order_documents")]
 public class OrderDocument

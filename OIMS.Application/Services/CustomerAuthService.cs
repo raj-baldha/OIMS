@@ -19,7 +19,8 @@ namespace OIMS.Application.Services
             ICustomerRepository customerRepository,
             IPasswordHelper passwordHelper,
             IJwtHelper jwtHelper,
-            IMapper mapper)
+            IMapper mapper
+        )
         {
             _customerRepository = customerRepository;
             _passwordHelper = passwordHelper;
@@ -27,7 +28,9 @@ namespace OIMS.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<(CustomerLoginResponseDto Customer, string Token)> LoginAsync(CustomerLoginRequestDto request)
+        public async Task<(CustomerLoginResponseDto Customer, string Token)> LoginAsync(
+            CustomerLoginRequestDto request
+        )
         {
             var customer = await _customerRepository.GetByEmailAsync(request.Email);
 
@@ -41,14 +44,17 @@ namespace OIMS.Application.Services
                 throw new UnauthorizedException("Your account is inactive.");
             }
 
-            bool isPasswordValid = _passwordHelper.VerifyPassword(request.Password,customer.PasswordHash);
+            bool isPasswordValid = _passwordHelper.VerifyPassword(
+                request.Password,
+                customer.PasswordHash
+            );
 
             if (!isPasswordValid)
             {
                 throw new UnauthorizedException("Invalid email or password.");
             }
 
-            string token =_jwtHelper.GenerateToken(customer.Id,customer.Email,"Customer");
+            string token = _jwtHelper.GenerateToken(customer.Id, customer.Email, "Customer");
 
             var response = _mapper.Map<CustomerLoginResponseDto>(customer);
 

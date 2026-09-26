@@ -10,9 +10,7 @@ namespace OIMS.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "original_file_name",
-                table: "order_documents");
+            migrationBuilder.DropColumn(name: "original_file_name", table: "order_documents");
 
             migrationBuilder.AlterColumn<string>(
                 name: "stored_file_name",
@@ -24,7 +22,8 @@ namespace OIMS.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(255)",
                 oldMaxLength: 255,
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<long>(
                 name: "file_size",
@@ -34,7 +33,8 @@ namespace OIMS.Data.Migrations
                 defaultValue: 0L,
                 oldClrType: typeof(long),
                 oldType: "bigint",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "content_type",
@@ -46,7 +46,8 @@ namespace OIMS.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(100)",
                 oldMaxLength: 100,
-                oldNullable: true);
+                oldNullable: true
+            );
         }
 
         /// <inheritdoc />
@@ -60,7 +61,8 @@ namespace OIMS.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(255)",
-                oldMaxLength: 255);
+                oldMaxLength: 255
+            );
 
             migrationBuilder.AlterColumn<long>(
                 name: "file_size",
@@ -68,7 +70,8 @@ namespace OIMS.Data.Migrations
                 type: "bigint",
                 nullable: true,
                 oldClrType: typeof(long),
-                oldType: "bigint");
+                oldType: "bigint"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "content_type",
@@ -78,14 +81,16 @@ namespace OIMS.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(100)",
-                oldMaxLength: 100);
+                oldMaxLength: 100
+            );
 
             migrationBuilder.AddColumn<string>(
                 name: "original_file_name",
                 table: "order_documents",
                 type: "nvarchar(255)",
                 maxLength: 255,
-                nullable: true);
+                nullable: true
+            );
         }
     }
 }

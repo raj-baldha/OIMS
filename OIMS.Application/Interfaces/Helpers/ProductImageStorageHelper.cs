@@ -6,34 +6,28 @@ namespace OIMS.Application.Helpers
     {
         private const string ImageFolder = "uploads/products";
 
-        public static async Task<string> SaveImageAsync(
-            int productId,
-            IFormFile file)
+        public static async Task<string> SaveImageAsync(int productId, IFormFile file)
         {
             string folderPath = Path.Combine(
                 Directory.GetCurrentDirectory(),
                 "wwwroot",
                 "uploads",
                 "products",
-                productId.ToString());
+                productId.ToString()
+            );
 
             if (!Directory.Exists(folderPath))
             {
                 Directory.CreateDirectory(folderPath);
             }
 
-            string extension =
-                Path.GetExtension(file.FileName).ToLowerInvariant();
+            string extension = Path.GetExtension(file.FileName).ToLowerInvariant();
 
-            string storedFileName =
-                $"{Guid.NewGuid()}{extension}";
+            string storedFileName = $"{Guid.NewGuid()}{extension}";
 
-            string filePath = Path.Combine(
-                folderPath,
-                storedFileName);
+            string filePath = Path.Combine(folderPath, storedFileName);
 
-            await using var stream =
-                new FileStream(filePath, FileMode.Create);
+            await using var stream = new FileStream(filePath, FileMode.Create);
 
             await file.CopyToAsync(stream);
 

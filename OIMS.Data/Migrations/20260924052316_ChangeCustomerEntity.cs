@@ -10,23 +10,18 @@ namespace OIMS.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_customers_users_user_id",
-                table: "customers");
+            migrationBuilder.DropForeignKey(name: "FK_customers_users_user_id", table: "customers");
 
-            migrationBuilder.DropIndex(
-                name: "IX_customers_user_id",
-                table: "customers");
+            migrationBuilder.DropIndex(name: "IX_customers_user_id", table: "customers");
 
-            migrationBuilder.DropColumn(
-                name: "user_id",
-                table: "customers");
+            migrationBuilder.DropColumn(name: "user_id", table: "customers");
 
             migrationBuilder.AddColumn<int>(
                 name: "CustomerId",
                 table: "users",
                 type: "int",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.AddColumn<string>(
                 name: "email",
@@ -34,7 +29,8 @@ namespace OIMS.Data.Migrations
                 type: "nvarchar(256)",
                 maxLength: 256,
                 nullable: false,
-                defaultValue: "");
+                defaultValue: ""
+            );
 
             migrationBuilder.AddColumn<string>(
                 name: "password_hash",
@@ -42,66 +38,60 @@ namespace OIMS.Data.Migrations
                 type: "nvarchar(500)",
                 maxLength: 500,
                 nullable: false,
-                defaultValue: "");
+                defaultValue: ""
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_users_CustomerId",
                 table: "users",
-                column: "CustomerId");
+                column: "CustomerId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_customers_id",
                 table: "customers",
                 column: "id",
-                unique: true);
+                unique: true
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_users_customers_CustomerId",
                 table: "users",
                 column: "CustomerId",
                 principalTable: "customers",
-                principalColumn: "id");
+                principalColumn: "id"
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_users_customers_CustomerId",
-                table: "users");
+            migrationBuilder.DropForeignKey(name: "FK_users_customers_CustomerId", table: "users");
 
-            migrationBuilder.DropIndex(
-                name: "IX_users_CustomerId",
-                table: "users");
+            migrationBuilder.DropIndex(name: "IX_users_CustomerId", table: "users");
 
-            migrationBuilder.DropIndex(
-                name: "IX_customers_id",
-                table: "customers");
+            migrationBuilder.DropIndex(name: "IX_customers_id", table: "customers");
 
-            migrationBuilder.DropColumn(
-                name: "CustomerId",
-                table: "users");
+            migrationBuilder.DropColumn(name: "CustomerId", table: "users");
 
-            migrationBuilder.DropColumn(
-                name: "email",
-                table: "customers");
+            migrationBuilder.DropColumn(name: "email", table: "customers");
 
-            migrationBuilder.DropColumn(
-                name: "password_hash",
-                table: "customers");
+            migrationBuilder.DropColumn(name: "password_hash", table: "customers");
 
             migrationBuilder.AddColumn<int>(
                 name: "user_id",
                 table: "customers",
                 type: "int",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_customers_user_id",
                 table: "customers",
                 column: "user_id",
-                unique: true);
+                unique: true
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_customers_users_user_id",
@@ -109,7 +99,8 @@ namespace OIMS.Data.Migrations
                 column: "user_id",
                 principalTable: "users",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Restrict);
+                onDelete: ReferentialAction.Restrict
+            );
         }
     }
 }

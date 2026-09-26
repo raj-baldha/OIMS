@@ -1,8 +1,8 @@
-﻿using FluentValidation;
-using OIMS.Application.DTOs.Request;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using FluentValidation;
+using OIMS.Application.DTOs.Request;
 
 namespace OIMS.Application.Validators
 {

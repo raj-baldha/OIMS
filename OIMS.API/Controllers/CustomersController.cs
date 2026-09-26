@@ -14,8 +14,7 @@ namespace OIMS.API.Controllers
     {
         private readonly ICustomerService _customerService;
 
-        public CustomersController(
-            ICustomerService customerService)
+        public CustomersController(ICustomerService customerService)
         {
             _customerService = customerService;
         }
@@ -26,37 +25,46 @@ namespace OIMS.API.Controllers
         {
             int userId = ClaimHelper.GetUserId(User);
 
-            var customer = await _customerService.CreateCustomerAsync(request,userId);
+            var customer = await _customerService.CreateCustomerAsync(request, userId);
 
-            var response = ApiResponse<CreatedCustomerResponseDto>.SuccessResponse(customer,"Customer created successfully.");
+            var response = ApiResponse<CreatedCustomerResponseDto>.SuccessResponse(
+                customer,
+                "Customer created successfully."
+            );
 
-            return StatusCode(StatusCodes.Status201Created,response);
+            return StatusCode(StatusCodes.Status201Created, response);
         }
 
         [Authorize(Roles = "Administrator,Manager,Employee,Customer")]
         [HttpGet]
         public async Task<IActionResult> GetCustomers([FromQuery] GetCustomersRequestDto request)
-        {  
+        {
             string role = ClaimHelper.GetRole(User);
 
             int userId = ClaimHelper.GetUserId(User);
 
-            var customers = await _customerService.GetCustomersAsync(request,role,userId);
+            var customers = await _customerService.GetCustomersAsync(request, role, userId);
 
-            var response = ApiResponse<PagedResponseDto<CustomerListResponseDto>>.SuccessResponse(customers,"Customers retrieved successfully.");
+            var response = ApiResponse<PagedResponseDto<CustomerListResponseDto>>.SuccessResponse(
+                customers,
+                "Customers retrieved successfully."
+            );
 
             return Ok(response);
         }
 
         [Authorize(Roles = "Administrator,Manager,Employee")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCustomer(int id,UpdateCustomerRequestDto request)
+        public async Task<IActionResult> UpdateCustomer(int id, UpdateCustomerRequestDto request)
         {
             int userId = ClaimHelper.GetUserId(User);
 
-            var customer = await _customerService.UpdateCustomerAsync(id,request,userId);
+            var customer = await _customerService.UpdateCustomerAsync(id, request, userId);
 
-            var response = ApiResponse<CreatedCustomerResponseDto>.SuccessResponse(customer,"Customer updated successfully.");
+            var response = ApiResponse<CreatedCustomerResponseDto>.SuccessResponse(
+                customer,
+                "Customer updated successfully."
+            );
 
             return Ok(response);
         }
@@ -69,7 +77,10 @@ namespace OIMS.API.Controllers
 
             await _customerService.DeactiveCustomersAsync(id, userId);
 
-            var response = ApiResponse<bool>.SuccessResponse(true, "Customer deactivated successfully.");
+            var response = ApiResponse<bool>.SuccessResponse(
+                true,
+                "Customer deactivated successfully."
+            );
 
             return Ok(response);
         }

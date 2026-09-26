@@ -1,7 +1,7 @@
-﻿using OIMS.Domain.Enums;
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using OIMS.Domain.Enums;
 
 namespace OIMS.Domain.Entities
 {

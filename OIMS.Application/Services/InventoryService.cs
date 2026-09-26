@@ -15,19 +15,22 @@ namespace OIMS.Application.Services
 
         public InventoryService(
             IInventoryRepository inventoryRepository,
-            IConfiguration configuration)
+            IConfiguration configuration
+        )
         {
             _inventoryRepository = inventoryRepository;
             _configuration = configuration;
         }
 
-        public async Task<List<LowStockProductResponseDto>>GetLowStockProductsAsync()
+        public async Task<List<LowStockProductResponseDto>> GetLowStockProductsAsync()
         {
-            return await _inventoryRepository
-                .GetLowStockProductsAsync();
+            return await _inventoryRepository.GetLowStockProductsAsync();
         }
 
-        public async Task<PagedResponseDto<InventoryHistoryResponseDto>> GetInventoryHistoryAsync( int productId, GetInventoryHistoryRequestDto request)
+        public async Task<PagedResponseDto<InventoryHistoryResponseDto>> GetInventoryHistoryAsync(
+            int productId,
+            GetInventoryHistoryRequestDto request
+        )
         {
             bool productExists = await _inventoryRepository.ProductExistsAsync(productId);
 
@@ -43,13 +46,15 @@ namespace OIMS.Application.Services
                 pageSize = 10;
             }
 
-            int page = request.Page < 1
-                ? 1
-                : request.Page;
+            int page = request.Page < 1 ? 1 : request.Page;
 
             request.Page = page;
 
-            var result = await _inventoryRepository.GetInventoryHistoryAsync(productId,request,pageSize);
+            var result = await _inventoryRepository.GetInventoryHistoryAsync(
+                productId,
+                request,
+                pageSize
+            );
 
             int totalPages = (int)Math.Ceiling(result.TotalRecords / (double)pageSize);
 
@@ -59,7 +64,7 @@ namespace OIMS.Application.Services
                 Page = page,
                 PageSize = pageSize,
                 TotalRecords = result.TotalRecords,
-                TotalPages = totalPages
+                TotalPages = totalPages,
             };
         }
     }

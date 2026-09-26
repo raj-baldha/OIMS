@@ -24,17 +24,25 @@ namespace OIMS.API.Controllers
         {
             var products = await _inventoryService.GetLowStockProductsAsync();
 
-            var response = ApiResponse<List<LowStockProductResponseDto>>.SuccessResponse(products,"Low-stock products retrieved successfully.");
+            var response = ApiResponse<List<LowStockProductResponseDto>>.SuccessResponse(
+                products,
+                "Low-stock products retrieved successfully."
+            );
 
             return Ok(response);
         }
 
         [HttpGet("{productId:int}/inventory-history")]
-        public async Task<IActionResult> GetInventoryHistory(int productId,[FromQuery] GetInventoryHistoryRequestDto request)
+        public async Task<IActionResult> GetInventoryHistory(
+            int productId,
+            [FromQuery] GetInventoryHistoryRequestDto request
+        )
         {
-            var history = await _inventoryService.GetInventoryHistoryAsync(productId,request);
+            var history = await _inventoryService.GetInventoryHistoryAsync(productId, request);
 
-            var response = ApiResponse<PagedResponseDto<InventoryHistoryResponseDto>>.SuccessResponse(history,"Inventory history retrieved successfully.");
+            var response = ApiResponse<
+                PagedResponseDto<InventoryHistoryResponseDto>
+            >.SuccessResponse(history, "Inventory history retrieved successfully.");
 
             return Ok(response);
         }

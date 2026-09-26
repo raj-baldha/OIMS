@@ -7,13 +7,11 @@ namespace OIMS.Application.Interfaces.Repositories
     {
         Task<Customer?> GetCustomerAsync(int customerId);
 
-        Task<List<Product>> GetProductsAsync(
-            List<int> productIds);
+        Task<List<Product>> GetProductsAsync(List<int> productIds);
 
         Task AddOrderAsync(Order order);
 
-        Task AddInventoryTransactionsAsync(
-            List<InventoryTransaction> transactions);
+        Task AddInventoryTransactionsAsync(List<InventoryTransaction> transactions);
 
         Task AddAuditLogAsync(AuditLog auditLog);
 
@@ -25,17 +23,15 @@ namespace OIMS.Application.Interfaces.Repositories
 
         Task RollbackTransactionAsync();
 
-        Task<Order?> GetOrderForStatusUpdateAsync(
-           int orderId);
+        Task<Order?> GetOrderForStatusUpdateAsync(int orderId);
 
-        Task AddOrderStatusHistoryAsync(
-            OrderStatusHistory statusHistory);
+        Task AddOrderStatusHistoryAsync(OrderStatusHistory statusHistory);
 
-        Task<(List<OrderListResponseDto> Data, int TotalRecords)>
-        GetOrdersAsync(
+        Task<(List<OrderListResponseDto> Data, int TotalRecords)> GetOrdersAsync(
             GetOrdersRequestDto request,
             int pageSize,
-            int? customerId);
+            int? customerId
+        );
 
         Task<Order?> GetOrderForInvoiceAsync(int orderId);
         Task AddOrderDocumentAsync(OrderDocument orderDocument);

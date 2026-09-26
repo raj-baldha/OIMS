@@ -1,9 +1,9 @@
-﻿using OIMS.Application.Interfaces.Repositories;
-using OIMS.Data.DbContext;
-using OIMS.Domain.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using OIMS.Application.Interfaces.Repositories;
+using OIMS.Data.DbContext;
+using OIMS.Domain.Entities;
 
 namespace OIMS.Infrastructure.Repositories
 {

@@ -1,10 +1,10 @@
-﻿using OIMS.Application.Interfaces.Repositories;
-using OIMS.Data.DbContext;
-using OIMS.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
+using OIMS.Application.Interfaces.Repositories;
+using OIMS.Data.DbContext;
+using OIMS.Domain.Entities;
 
 namespace OIMS.Infrastructure.Repositories
 {
@@ -19,14 +19,12 @@ namespace OIMS.Infrastructure.Repositories
 
         public async Task<bool> IsEmailExistsAsync(string email)
         {
-            return await _context.Users
-                .AnyAsync(u => u.Email == email && !u.IsDeleted);
+            return await _context.Users.AnyAsync(u => u.Email == email && !u.IsDeleted);
         }
 
         public async Task<User?> GetByEmailAsync(string email)
         {
-            return await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
         }
 
         public async Task AddAsync(User user)

@@ -16,10 +16,7 @@ namespace OIMS.Infrastructure.Repositories
 
         public async Task<bool> IsNameExistsAsync(string name)
         {
-            return await _context.Categories
-                .AnyAsync(x =>
-                    x.Name == name &&
-                    !x.IsDeleted);
+            return await _context.Categories.AnyAsync(x => x.Name == name && !x.IsDeleted);
         }
 
         public async Task AddAsync(Category category)

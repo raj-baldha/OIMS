@@ -4,15 +4,14 @@
     {
         private const string InvoiceFolder = "uploads/invoices";
 
-        public static async Task<string> SaveInvoiceAsync(
-            int orderId,
-            byte[] pdf)
+        public static async Task<string> SaveInvoiceAsync(int orderId, byte[] pdf)
         {
             string invoiceFolderPath = Path.Combine(
                 Directory.GetCurrentDirectory(),
                 "wwwroot",
                 "uploads",
-                "invoices");
+                "invoices"
+            );
 
             if (!Directory.Exists(invoiceFolderPath))
             {
@@ -21,9 +20,7 @@
 
             string storedFileName = $"invoice-{orderId}.pdf";
 
-            string filePath = Path.Combine(
-                invoiceFolderPath,
-                storedFileName);
+            string filePath = Path.Combine(invoiceFolderPath, storedFileName);
 
             await File.WriteAllBytesAsync(filePath, pdf);
 
@@ -44,7 +41,8 @@
             string filePath = Path.Combine(
                 Directory.GetCurrentDirectory(),
                 "wwwroot",
-                relativePath);
+                relativePath
+            );
 
             if (File.Exists(filePath))
             {

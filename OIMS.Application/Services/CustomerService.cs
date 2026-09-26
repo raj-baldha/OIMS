@@ -24,7 +24,8 @@ namespace OIMS.Application.Services
             IPasswordHelper passwordHelper,
             IEmailService emailService,
             IConfiguration configuration,
-            IMapper mapper)
+            IMapper mapper
+        )
         {
             _customerRepository = customerRepository;
             _passwordHelper = passwordHelper;
@@ -33,7 +34,10 @@ namespace OIMS.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<CreatedCustomerResponseDto>CreateCustomerAsync(CreateCustomerRequestDto request,int userId)
+        public async Task<CreatedCustomerResponseDto> CreateCustomerAsync(
+            CreateCustomerRequestDto request,
+            int userId
+        )
         {
             bool emailExists = await _customerRepository.IsEmailExistsAsync(request.Email);
 
@@ -60,7 +64,7 @@ namespace OIMS.Application.Services
                 IsActive = true,
                 IsDeleted = false,
                 CreatedAt = DateTime.UtcNow,
-                CreatedBy = userId
+                CreatedBy = userId,
             };
 
             await _customerRepository.AddAsync(customer);
@@ -70,18 +74,17 @@ namespace OIMS.Application.Services
             var templatePath = Path.Combine(
                 AppContext.BaseDirectory,
                 "EmailTemplate",
-                "WelcomeEmail.html");
+                "WelcomeEmail.html"
+            );
 
-            var body =
-                await File.ReadAllTextAsync(templatePath);
+            var body = await File.ReadAllTextAsync(templatePath);
 
-            body = body
-               .Replace("{{Username}}", $"{customer.FirstName} {customer.LastName}")
-               .Replace("{{Email}}", customer.Email)
-               .Replace("{{Role}}", "Customer")
-               .Replace("{{Password}}", request.Password);
+            body = body.Replace("{{Username}}", $"{customer.FirstName} {customer.LastName}")
+                .Replace("{{Email}}", customer.Email)
+                .Replace("{{Role}}", "Customer")
+                .Replace("{{Password}}", request.Password);
 
-            await _emailService.SendEmailAsync(customer.Email,"Welcome to OIMS",body);
+            await _emailService.SendEmailAsync(customer.Email, "Welcome to OIMS", body);
 
             return new CreatedCustomerResponseDto
             {
@@ -95,11 +98,15 @@ namespace OIMS.Application.Services
                 State = customer.State,
                 Country = customer.Country,
                 IsActive = customer.IsActive,
-                CreatedAt = customer.CreatedAt
+                CreatedAt = customer.CreatedAt,
             };
         }
 
-        public async Task<PagedResponseDto<CustomerListResponseDto>>GetCustomersAsync(GetCustomersRequestDto request,string role,int userId)
+        public async Task<PagedResponseDto<CustomerListResponseDto>> GetCustomersAsync(
+            GetCustomersRequestDto request,
+            string role,
+            int userId
+        )
         {
             int? customerId = null;
 
@@ -125,13 +132,14 @@ namespace OIMS.Application.Services
                 request.SortOrder = "asc";
             }
 
-            return await _customerRepository.GetCustomersAsync(
-                request,
-                pageSize,
-                customerId);
+            return await _customerRepository.GetCustomersAsync(request, pageSize, customerId);
         }
 
-        public async Task<CreatedCustomerResponseDto>UpdateCustomerAsync(int id,UpdateCustomerRequestDto request,int userId)
+        public async Task<CreatedCustomerResponseDto> UpdateCustomerAsync(
+            int id,
+            UpdateCustomerRequestDto request,
+            int userId
+        )
         {
             var customer = await _customerRepository.GetByIdAsync(id);
 
@@ -168,7 +176,7 @@ namespace OIMS.Application.Services
                 CreatedAt = customer.CreatedAt,
             };
         }
-    
+
         public async Task DeactiveCustomersAsync(int id, int userId)
         {
             var customer = await _customerRepository.GetByIdAsync(id);

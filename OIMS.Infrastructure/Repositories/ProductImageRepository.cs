@@ -16,18 +16,16 @@ namespace OIMS.Infrastructure.Repositories
 
         public async Task<Product?> GetProductAsync(int productId)
         {
-            return await _context.Products
-                .FirstOrDefaultAsync(x =>
-                    x.Id == productId &&
-                    !x.IsDeleted);
+            return await _context.Products.FirstOrDefaultAsync(x =>
+                x.Id == productId && !x.IsDeleted
+            );
         }
 
         public async Task<int> GetImageCountAsync(int productId)
         {
-            return await _context.ProductImages
-                .CountAsync(x =>
-                    x.ProductId == productId &&
-                    !x.IsDeleted);
+            return await _context.ProductImages.CountAsync(x =>
+                x.ProductId == productId && !x.IsDeleted
+            );
         }
 
         public async Task AddAsync(ProductImage productImage)

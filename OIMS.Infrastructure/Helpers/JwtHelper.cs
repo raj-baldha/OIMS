@@ -16,55 +16,36 @@ namespace OIMS.Infrastructure.Helpers
             _configuration = configuration;
         }
 
-        public string GenerateToken(
-            int userId,
-            string email,
-            string role)
+        public string GenerateToken(int userId, string email, string role)
         {
-            var jwtSettings =
-                _configuration.GetSection("JwtSettings");
+            var jwtSettings = _configuration.GetSection("JwtSettings");
 
             var key = jwtSettings["Key"]!;
             var issuer = jwtSettings["Issuer"]!;
             var audience = jwtSettings["Audience"]!;
 
-            var expiryMinutes =
-                int.Parse(jwtSettings["ExpiryMinutes"]!);
+            var expiryMinutes = int.Parse(jwtSettings["ExpiryMinutes"]!);
 
             var claims = new List<Claim>
             {
-                new Claim(
-                    ClaimTypes.NameIdentifier,
-                    userId.ToString()),
-
-                new Claim(
-                    ClaimTypes.Email,
-                    email),
-
-                new Claim(
-                    ClaimTypes.Role,
-                    role)
+                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+                new Claim(ClaimTypes.Email, email),
+                new Claim(ClaimTypes.Role, role),
             };
 
-            var securityKey =
-                new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(key));
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
 
-            var credentials =
-                new SigningCredentials(
-                    securityKey,
-                    SecurityAlgorithms.HmacSha256);
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
                 issuer: issuer,
                 audience: audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(
-                    expiryMinutes),
-                signingCredentials: credentials);
+                expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
+                signingCredentials: credentials
+            );
 
-            return new JwtSecurityTokenHandler()
-                .WriteToken(token);
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

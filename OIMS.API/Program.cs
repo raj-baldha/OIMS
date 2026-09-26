@@ -1,3 +1,4 @@
+using System.Text;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,6 @@ using OIMS.Infrastructure.ExternalServices;
 using OIMS.Infrastructure.Helpers;
 using OIMS.Infrastructure.Repositories;
 using QuestPDF.Infrastructure;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +31,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
 
 builder.Services.AddHttpContextAccessor();
 
@@ -41,9 +42,9 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-builder.Services.AddScoped<IProductImageRepository,ProductImageRepository>();
+builder.Services.AddScoped<IProductImageRepository, ProductImageRepository>();
 builder.Services.AddScoped<IApiExecutionLogRepository, ApiExecutionLogRepository>();
-builder.Services.AddScoped<IApiExceptionLogRepository,ApiExceptionLogRepository>();
+builder.Services.AddScoped<IApiExceptionLogRepository, ApiExceptionLogRepository>();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -54,7 +55,7 @@ builder.Services.AddScoped<ICustomerAuthService, CustomerAuthService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<IProductImageService,ProductImageService>();
+builder.Services.AddScoped<IProductImageService, ProductImageService>();
 
 builder.Services.AddScoped<IJwtHelper, JwtHelper>();
 builder.Services.AddScoped<IPasswordHelper, PasswordHelper>();
@@ -62,8 +63,8 @@ builder.Services.AddScoped<IPasswordHelper, PasswordHelper>();
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var jwtKey = jwtSettings["Key"]!;
 
-builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder
+    .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -74,7 +75,7 @@ builder.Services
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwtSettings["Issuer"],
             ValidAudience = jwtSettings["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
         };
 
         options.Events = new JwtBearerEvents
@@ -88,17 +89,22 @@ builder.Services
                 }
 
                 return Task.CompletedTask;
-            }
+            },
         };
     });
 
-builder.Services.AddAuthorization((options) =>
-{
-    options.AddPolicy("CanManageProducts", policy =>
+builder.Services.AddAuthorization(
+    (options) =>
     {
-        policy.RequireRole("Administrator", "Manager","Employee");
-    });
-});
+        options.AddPolicy(
+            "CanManageProducts",
+            policy =>
+            {
+                policy.RequireRole("Administrator", "Manager", "Employee");
+            }
+        );
+    }
+);
 
 builder.Services.AddAuthorization();
 
@@ -107,7 +113,7 @@ builder.Services.AddAutoMapper(cfg =>
     cfg.AddProfile<MappingProfile>();
 });
 
-builder.Services.AddScoped<IValidator<CreateProductRequestDto>,CreateProductRequestValidator>();
+builder.Services.AddScoped<IValidator<CreateProductRequestDto>, CreateProductRequestValidator>();
 builder.Services.AddScoped<ExecutionTimeFilter>();
 
 var app = builder.Build();

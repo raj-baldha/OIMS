@@ -1,8 +1,8 @@
-﻿using OIMS.Application.DTOs.Orders;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using OIMS.Application.DTOs.Orders;
 
 namespace OIMS.Application.DTOs.Request
 {

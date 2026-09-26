@@ -4,8 +4,7 @@ using OIMS.Domain.Entities;
 
 namespace OIMS.Infrastructure.Repositories
 {
-    public class ApiExceptionLogRepository
-        : IApiExceptionLogRepository
+    public class ApiExceptionLogRepository : IApiExceptionLogRepository
     {
         private readonly AppDbContext _context;
 

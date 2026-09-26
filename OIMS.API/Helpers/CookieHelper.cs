@@ -8,7 +8,8 @@ namespace OIMS.API.Helpers
         public static void SetAccessTokenCookie(
             HttpResponse response,
             IConfiguration configuration,
-            string accessToken)
+            string accessToken
+        )
         {
             var accessTokenExpiryMinutes = double.Parse(
                 configuration["JwtSettings:ExpiryMinutes"] ?? "60"
@@ -19,24 +20,18 @@ namespace OIMS.API.Helpers
                 HttpOnly = true,
                 Secure = false,
                 SameSite = SameSiteMode.Lax,
-                Expires = DateTime.UtcNow.AddMinutes(
-                    accessTokenExpiryMinutes)
+                Expires = DateTime.UtcNow.AddMinutes(accessTokenExpiryMinutes),
             };
 
-            response.Cookies.Append(
-                "accessToken",
-                accessToken,
-                cookieOptions);
+            response.Cookies.Append("accessToken", accessToken, cookieOptions);
         }
 
-        public static void ClearAccessTokenCookie(
-            HttpResponse response)
+        public static void ClearAccessTokenCookie(HttpResponse response)
         {
             response.Cookies.Delete("accessToken");
         }
 
-        public static string? GetAccessToken(
-            HttpRequest request)
+        public static string? GetAccessToken(HttpRequest request)
         {
             return request.Cookies["accessToken"];
         }

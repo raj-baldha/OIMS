@@ -36,7 +36,6 @@ namespace OIMS.Domain.Entities
         [Column("deleted_by")]
         public int? DeletedBy { get; set; }
 
-        public virtual ICollection<Product> Products { get; set; }
-            = new List<Product>();
+        public virtual ICollection<Product> Products { get; set; } = new List<Product>();
     }
 }

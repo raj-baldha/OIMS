@@ -13,13 +13,17 @@ public class ExecutionTimeFilter : IAsyncActionFilter
 
     public ExecutionTimeFilter(
         IApiExecutionLogRepository repository,
-        ILogger<ExecutionTimeFilter> logger)
+        ILogger<ExecutionTimeFilter> logger
+    )
     {
         _repository = repository;
         _logger = logger;
     }
 
-    public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+    public async Task OnActionExecutionAsync(
+        ActionExecutingContext context,
+        ActionExecutionDelegate next
+    )
     {
         var stopwatch = Stopwatch.StartNew();
 
@@ -44,7 +48,8 @@ public class ExecutionTimeFilter : IAsyncActionFilter
             httpMethod,
             requestPath,
             executionTime,
-            statusCode);
+            statusCode
+        );
 
         var log = new ApiExecutionLog
         {
@@ -54,7 +59,7 @@ public class ExecutionTimeFilter : IAsyncActionFilter
             ActionName = actionName,
             StatusCode = statusCode,
             ExecutionTimeMs = executionTime,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
         };
 
         await _repository.AddAsync(log);

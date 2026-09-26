@@ -17,7 +17,8 @@ namespace OIMS.Data.Migrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(50)",
-                oldMaxLength: 50);
+                oldMaxLength: 50
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "payment_method",
@@ -26,7 +27,8 @@ namespace OIMS.Data.Migrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(50)",
-                oldMaxLength: 50);
+                oldMaxLength: 50
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "status",
@@ -35,7 +37,8 @@ namespace OIMS.Data.Migrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(50)",
-                oldMaxLength: 50);
+                oldMaxLength: 50
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "status",
@@ -44,7 +47,8 @@ namespace OIMS.Data.Migrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(50)",
-                oldMaxLength: 50);
+                oldMaxLength: 50
+            );
         }
 
         /// <inheritdoc />
@@ -57,7 +61,8 @@ namespace OIMS.Data.Migrations
                 maxLength: 50,
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "int");
+                oldType: "int"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "payment_method",
@@ -66,7 +71,8 @@ namespace OIMS.Data.Migrations
                 maxLength: 50,
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "int");
+                oldType: "int"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "status",
@@ -75,7 +81,8 @@ namespace OIMS.Data.Migrations
                 maxLength: 50,
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "int");
+                oldType: "int"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "status",
@@ -84,7 +91,8 @@ namespace OIMS.Data.Migrations
                 maxLength: 50,
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "int");
+                oldType: "int"
+            );
         }
     }
 }

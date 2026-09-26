@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using Microsoft.EntityFrameworkCore;
 using OIMS.Application.DTOs.Common;
 using OIMS.Application.DTOs.Request;
 using OIMS.Application.DTOs.Response;
@@ -6,9 +9,6 @@ using OIMS.Application.Helpers;
 using OIMS.Application.Interfaces.Repositories;
 using OIMS.Data.DbContext;
 using OIMS.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace OIMS.Infrastructure.Repositories
 {
@@ -23,18 +23,14 @@ namespace OIMS.Infrastructure.Repositories
 
         public async Task<bool> IsEmailExistsAsync(string email)
         {
-            return await _context.Customers
-                .AnyAsync(x =>
-                    x.Email == email &&
-                    !x.IsDeleted);
+            return await _context.Customers.AnyAsync(x => x.Email == email && !x.IsDeleted);
         }
 
         public async Task<Customer?> GetByEmailAsync(string email)
         {
-            return await _context.Customers
-                .FirstOrDefaultAsync(x =>
-                    x.Email == email &&
-                    !x.IsDeleted);
+            return await _context.Customers.FirstOrDefaultAsync(x =>
+                x.Email == email && !x.IsDeleted
+            );
         }
 
         public async Task AddAsync(Customer customer)
@@ -47,7 +43,11 @@ namespace OIMS.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<PagedResponseDto<CustomerListResponseDto>>GetCustomersAsync(GetCustomersRequestDto request,int pageSize,int? customerId)
+        public async Task<PagedResponseDto<CustomerListResponseDto>> GetCustomersAsync(
+            GetCustomersRequestDto request,
+            int pageSize,
+            int? customerId
+        )
         {
             var query = _context.Customers.AsNoTracking().Where(x => !x.IsDeleted);
 
@@ -61,9 +61,10 @@ namespace OIMS.Infrastructure.Repositories
                 string search = request.Search.Trim();
 
                 query = query.Where(x =>
-                    x.FirstName.Contains(search) ||
-                    x.LastName.Contains(search) ||
-                    x.Email.Contains(search));
+                    x.FirstName.Contains(search)
+                    || x.LastName.Contains(search)
+                    || x.Email.Contains(search)
+                );
             }
 
             if (request.SortBy == "email")
@@ -87,9 +88,7 @@ namespace OIMS.Infrastructure.Repositories
                 }
                 else
                 {
-                    query = query
-                        .OrderBy(x => x.FirstName)
-                        .ThenBy(x => x.LastName);
+                    query = query.OrderBy(x => x.FirstName).ThenBy(x => x.LastName);
                 }
             }
 
@@ -118,7 +117,7 @@ namespace OIMS.Infrastructure.Repositories
                     Email = x.Email,
                     Phone = x.Phone,
                     City = x.City,
-                    IsActive = x.IsActive
+                    IsActive = x.IsActive,
                 })
                 .ToListAsync();
 
@@ -128,15 +127,13 @@ namespace OIMS.Infrastructure.Repositories
                 Page = page,
                 PageSize = pageSize,
                 TotalRecords = totalRecords,
-                TotalPages = totalPages
+                TotalPages = totalPages,
             };
         }
+
         public async Task<Customer?> GetByIdAsync(int id)
         {
-            return await _context.Customers
-                .FirstOrDefaultAsync(x =>
-                    x.Id == id &&
-                    !x.IsDeleted);
+            return await _context.Customers.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
         }
     }
 }

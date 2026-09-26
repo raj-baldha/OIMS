@@ -10,13 +10,9 @@ namespace OIMS.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "reference_id",
-                table: "inventory_transactions");
+            migrationBuilder.DropColumn(name: "reference_id", table: "inventory_transactions");
 
-            migrationBuilder.DropColumn(
-                name: "reference_type",
-                table: "inventory_transactions");
+            migrationBuilder.DropColumn(name: "reference_type", table: "inventory_transactions");
         }
 
         /// <inheritdoc />
@@ -26,14 +22,16 @@ namespace OIMS.Data.Migrations
                 name: "reference_id",
                 table: "inventory_transactions",
                 type: "int",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.AddColumn<string>(
                 name: "reference_type",
                 table: "inventory_transactions",
                 type: "nvarchar(50)",
                 maxLength: 50,
-                nullable: true);
+                nullable: true
+            );
         }
     }
 }

@@ -30,7 +30,8 @@ public class OrdersController : ControllerBase
 
         var response = ApiResponse<CreatedOrderResponseDto>.SuccessResponse(
             order,
-            "Order placed successfully.");
+            "Order placed successfully."
+        );
 
         return StatusCode(StatusCodes.Status201Created, response);
     }
@@ -39,7 +40,8 @@ public class OrdersController : ControllerBase
     [Authorize(Roles = "Administrator,Manager,Employee")]
     public async Task<IActionResult> UpdateOrderStatus(
         int orderId,
-        UpdateOrderStatusRequestDto request)
+        UpdateOrderStatusRequestDto request
+    )
     {
         int userId = ClaimHelper.GetUserId(User);
 
@@ -47,7 +49,8 @@ public class OrdersController : ControllerBase
 
         var response = ApiResponse<object>.SuccessResponse(
             null!,
-            "Order status updated successfully.");
+            "Order status updated successfully."
+        );
 
         return Ok(response);
     }
@@ -61,9 +64,7 @@ public class OrdersController : ControllerBase
 
         await _orderService.CancelOrderAsync(orderId, userId, role);
 
-        var response = ApiResponse<object>.SuccessResponse(
-            null!,
-            "Order cancelled successfully.");
+        var response = ApiResponse<object>.SuccessResponse(null!, "Order cancelled successfully.");
 
         return Ok(response);
     }
@@ -79,7 +80,8 @@ public class OrdersController : ControllerBase
 
         var response = ApiResponse<PagedResponseDto<OrderListResponseDto>>.SuccessResponse(
             orders,
-            "Orders retrieved successfully.");
+            "Orders retrieved successfully."
+        );
 
         return Ok(response);
     }
