@@ -1,12 +1,16 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using OIMS.API.Filters;
 using OIMS.API.Middlewares;
+using OIMS.Application.DTOs.Request;
 using OIMS.Application.Interfaces.Helpers;
 using OIMS.Application.Interfaces.Repositories;
 using OIMS.Application.Interfaces.Services;
 using OIMS.Application.Mappings;
 using OIMS.Application.Services;
+using OIMS.Application.Validators;
 using OIMS.Data.DbContext;
 using OIMS.Infrastructure.ExternalServices;
 using OIMS.Infrastructure.Helpers;
@@ -18,7 +22,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 QuestPDF.Settings.License = LicenseType.Community;
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.AddService<ExecutionTimeFilter>();
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -34,6 +42,8 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IProductImageRepository,ProductImageRepository>();
+builder.Services.AddScoped<IApiExecutionLogRepository, ApiExecutionLogRepository>();
+builder.Services.AddScoped<IApiExceptionLogRepository,ApiExceptionLogRepository>();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -82,12 +92,23 @@ builder.Services
         };
     });
 
+builder.Services.AddAuthorization((options) =>
+{
+    options.AddPolicy("CanManageProducts", policy =>
+    {
+        policy.RequireRole("Administrator", "Manager","Employee");
+    });
+});
+
 builder.Services.AddAuthorization();
 
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<MappingProfile>();
 });
+
+builder.Services.AddScoped<IValidator<CreateProductRequestDto>,CreateProductRequestValidator>();
+builder.Services.AddScoped<ExecutionTimeFilter>();
 
 var app = builder.Build();
 

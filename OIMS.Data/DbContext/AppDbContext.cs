@@ -11,7 +11,6 @@ namespace OIMS.Data.DbContext
         }
 
         public DbSet<User> Users { get; set; } = null!;
-        public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
         public DbSet<Customer> Customers { get; set; } = null!;
         public DbSet<Category> Categories { get; set; } = null!;
         public DbSet<Product> Products { get; set; } = null!;
@@ -24,6 +23,8 @@ namespace OIMS.Data.DbContext
         public DbSet<OrderDocument> OrderDocuments { get; set; } = null!;
         public DbSet<Notification> Notifications { get; set; } = null!;
         public DbSet<AuditLog> AuditLogs { get; set; } = null!;
+        public DbSet<ApiExecutionLog> ApiExecutionLogs { get; set; } = null!;
+        public DbSet<ApiExceptionLog> ApiExceptionLogs { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -35,10 +36,6 @@ namespace OIMS.Data.DbContext
 
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
-                .IsUnique();
-
-            modelBuilder.Entity<RefreshToken>()
-                .HasIndex(rt => rt.Token)
                 .IsUnique();
 
             modelBuilder.Entity<Customer>()

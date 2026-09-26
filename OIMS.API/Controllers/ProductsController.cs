@@ -1,36 +1,53 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OIMS.API.Helpers;
 using OIMS.Application.DTOs.Common;
 using OIMS.Application.DTOs.Request;
 using OIMS.Application.DTOs.Response;
 using OIMS.Application.Interfaces.Services;
+using OIMS.Domain.Exceptions;
 
 namespace OIMS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Administrator,Manager,Employee")]
+    //[Authorize(Roles = "Administrator,Manager,Employee")]
+    [Authorize(Policy = "CanManageProducts")]
+
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
+        private readonly IValidator<CreateProductRequestDto> _createProductValidator;
 
         public ProductsController(
-            IProductService productService)
+            IProductService productService,
+            IValidator<CreateProductRequestDto> createProductValidator)
         {
             _productService = productService;
+            _createProductValidator = createProductValidator;
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateProduct(CreateProductRequestDto request)
         {
+            var validationResult = await _createProductValidator.ValidateAsync(request);
+            if (!validationResult.IsValid)
+            {
+                var errors = validationResult.Errors
+                    .Select(x => x.ErrorMessage)
+                    .ToList();
+
+                throw new BadRequestException("Validation failed.", errors);
+            }
+
             int userId = ClaimHelper.GetUserId(User);
 
-            var product = await _productService.CreateProductAsync(request,userId);
+            var product = await _productService.CreateProductAsync(request, userId);
 
             var response = ApiResponse<CreatedProductResponseDto>.SuccessResponse(product,"Product created successfully.");
 
-            return StatusCode(StatusCodes.Status201Created,response);
+            return StatusCode(StatusCodes.Status201Created, response);
         }
 
         [HttpPut("{productId:int}")]

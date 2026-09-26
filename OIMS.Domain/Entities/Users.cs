@@ -62,8 +62,6 @@ namespace OIMS.Domain.Entities
 
         public virtual Customer? Customer { get; set; }
 
-        public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
-
         public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
         public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();

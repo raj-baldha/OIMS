@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OIMS.Application.DTOs.Request;
 using OIMS.Application.DTOs.Response;
+using OIMS.Application.Helpers;
 using OIMS.Application.Interfaces.Repositories;
 using OIMS.Data.DbContext;
 using OIMS.Domain.Entities;
@@ -150,6 +151,7 @@ namespace OIMS.Infrastructure.Repositories
             var data = await query
                 .Skip(skip)
                 .Take(pageSize)
+                //.Paginate(skip, pageSize)
                 .Select(x => new ProductListResponseDto
                 {
                     Id = x.Id,

@@ -2,6 +2,7 @@
 using OIMS.Application.DTOs.Common;
 using OIMS.Application.DTOs.Request;
 using OIMS.Application.DTOs.Response;
+using OIMS.Application.Helpers;
 using OIMS.Application.Interfaces.Repositories;
 using OIMS.Data.DbContext;
 using OIMS.Domain.Entities;
@@ -108,6 +109,7 @@ namespace OIMS.Infrastructure.Repositories
             var customers = await query
                 .Skip(skip)
                 .Take(pageSize)
+                //.Paginate(skip, pageSize)
                 .Select(x => new CustomerListResponseDto
                 {
                     Id = x.Id,

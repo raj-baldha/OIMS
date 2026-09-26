@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using OIMS.Application.DTOs.Request;
 using OIMS.Application.DTOs.Response;
+using OIMS.Application.Helpers;
 using OIMS.Application.Interfaces.Repositories;
 using OIMS.Data.DbContext;
 using OIMS.Domain.Entities;
@@ -77,6 +78,7 @@ namespace OIMS.Infrastructure.Repositories
                 .ThenBy(x => x.Id)
                 .Skip(skip)
                 .Take(pageSize)
+                //.Paginate(skip, pageSize)
                 .Select(x => new InventoryHistoryResponseDto
                 {
                     Id = x.Id,
