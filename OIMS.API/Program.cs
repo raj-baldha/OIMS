@@ -115,6 +115,7 @@ builder.Services.AddAutoMapper(cfg =>
 
 builder.Services.AddScoped<IValidator<CreateProductRequestDto>, CreateProductRequestValidator>();
 builder.Services.AddScoped<ExecutionTimeFilter>();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 

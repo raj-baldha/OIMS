@@ -21,6 +21,13 @@ namespace OIMS.Infrastructure.Repositories
             );
         }
 
+        public async Task<List<ProductImage>> GetImagesByProductIdAsync(int productId)
+        {
+            return await _context
+                .ProductImages.Where(x => x.ProductId == productId && !x.IsDeleted)
+                .ToListAsync();
+        }
+
         public async Task<int> GetImageCountAsync(int productId)
         {
             return await _context.ProductImages.CountAsync(x =>

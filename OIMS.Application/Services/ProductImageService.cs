@@ -23,10 +23,15 @@ public class ProductImageService : IProductImageService
     ];
 
     private readonly IProductImageRepository _productImageRepository;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public ProductImageService(IProductImageRepository productImageRepository)
+    public ProductImageService(
+        IProductImageRepository productImageRepository,
+        IHttpContextAccessor httpContextAccessor
+    )
     {
         _productImageRepository = productImageRepository;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<List<ProductImageResponseDto>> UploadImagesAsync(
@@ -86,12 +91,14 @@ public class ProductImageService : IProductImageService
 
         await _productImageRepository.SaveChangesAsync();
 
+        var request = _httpContextAccessor.HttpContext!.Request;
+
         return uploadedImages
             .Select(image => new ProductImageResponseDto
             {
                 Id = image.Id,
                 ProductId = image.ProductId,
-                FileUrl = image.FileUrl,
+                FileUrl = request.Scheme + "://" + request.Host + image.FileUrl,
                 OriginalFileName = image.OriginalFileName,
                 ContentType = image.ContentType,
                 FileSize = image.FileSize,
