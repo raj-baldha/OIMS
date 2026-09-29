@@ -36,5 +36,13 @@ namespace OIMS.Infrastructure.Repositories
         {
             await _context.SaveChangesAsync();
         }
+
+        public async Task<List<User>> GetActiveUsersByRolesAsync(List<string> roles)
+        {
+            return await _context
+                .Users.AsNoTracking()
+                .Where(x => !x.IsDeleted && x.IsActive && roles.Contains(x.Role))
+                .ToListAsync();
+        }
     }
 }

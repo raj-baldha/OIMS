@@ -11,5 +11,6 @@ namespace OIMS.Application.Interfaces.Repositories
         Task<User?> GetByEmailAsync(string email);
         Task AddAsync(User user);
         Task SaveChangesAsync();
+        Task<List<User>> GetActiveUsersByRolesAsync(List<string> roles);
     }
 }
