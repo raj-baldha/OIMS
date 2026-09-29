@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Hangfire;
+using Microsoft.Extensions.Configuration;
+using OIMS.Application.BackgroundJobs;
 using OIMS.Application.DTOs.Common;
 using OIMS.Application.DTOs.Orders;
 using OIMS.Application.DTOs.Request;
@@ -15,12 +17,18 @@ public class OrderService : IOrderService
 {
     private readonly IOrderRepository _orderRepository;
     private readonly IConfiguration _configuration;
+    private readonly IBackgroundJobClient _backgroundJobClient;
 
     /// <summary>Initializes the service with its order repository and configuration.</summary>
-    public OrderService(IOrderRepository orderRepository, IConfiguration configuration)
+    public OrderService(
+        IOrderRepository orderRepository,
+        IConfiguration configuration,
+        IBackgroundJobClient backgroundJobClient
+    )
     {
         _orderRepository = orderRepository;
         _configuration = configuration;
+        _backgroundJobClient = backgroundJobClient;
     }
 
     /// <summary>Creates an order, updates inventory, records related data, and generates its invoice.</summary>
@@ -29,7 +37,9 @@ public class OrderService : IOrderService
         int customerId
     )
     {
+        // Step 1: Get the customer and validate the basic order request.
         var customer = await _orderRepository.GetCustomerAsync(customerId);
+
         if (customer is null)
         {
             throw new NotFoundException("Customer not found or inactive.");
@@ -56,6 +66,7 @@ public class OrderService : IOrderService
             throw new BadRequestException("Invalid payment method.");
         }
 
+        // Step 2: Validate product IDs and prevent duplicate products.
         var productIds = request.Items.Select(x => x.ProductId).ToList();
 
         if (productIds.Count != productIds.Distinct().Count())
@@ -63,6 +74,7 @@ public class OrderService : IOrderService
             throw new BadRequestException("The same product cannot be added multiple times.");
         }
 
+        // Step 3: Get all requested products from the database.
         var products = await _orderRepository.GetProductsAsync(productIds);
 
         if (products.Count != productIds.Count)
@@ -72,6 +84,7 @@ public class OrderService : IOrderService
 
         var productLookup = products.ToDictionary(p => p.Id);
 
+        // Step 4: Calculate order totals and prepare order items and inventory transactions.
         decimal subtotal = 0;
         var orderItems = new List<OrderItem>();
         var inventoryTransactions = new List<InventoryTransaction>();
@@ -86,6 +99,7 @@ public class OrderService : IOrderService
 
             var product = productLookup[requestItem.ProductId];
 
+            // Check whether enough stock is available.
             if (product.QuantityOnHand < requestItem.Quantity)
             {
                 throw new BadRequestException($"Insufficient stock for product '{product.Name}'.");
@@ -93,8 +107,10 @@ public class OrderService : IOrderService
 
             int quantityBefore = product.QuantityOnHand;
             decimal lineTotal = product.SellingPrice * requestItem.Quantity;
+
             subtotal += lineTotal;
 
+            // Create the order item.
             orderItems.Add(
                 new OrderItem
                 {
@@ -107,11 +123,13 @@ public class OrderService : IOrderService
                 }
             );
 
+            // Decrease the product stock.
             product.QuantityOnHand -= requestItem.Quantity;
             product.UpdatedAt = now;
             product.UpdatedBy = customerId;
             product.Version++;
 
+            // Record the stock change in inventory history.
             inventoryTransactions.Add(
                 new InventoryTransaction
                 {
@@ -127,9 +145,11 @@ public class OrderService : IOrderService
             );
         }
 
+        // Step 5: Calculate the final order amount.
         const decimal discountAmount = 0m;
         decimal totalAmount = subtotal - discountAmount;
 
+        // Step 6: Create the main order and payment information.
         var order = new Order
         {
             CustomerId = customerId,
@@ -142,6 +162,7 @@ public class OrderService : IOrderService
             CreatedAt = now,
             CreatedBy = customerId,
             IsDeleted = false,
+
             Payment = new Payment
             {
                 Amount = totalAmount,
@@ -152,6 +173,7 @@ public class OrderService : IOrderService
             },
         };
 
+        // Step 7: Add order items and initial order status history.
         foreach (var item in orderItems)
         {
             order.OrderItems.Add(item);
@@ -170,12 +192,15 @@ public class OrderService : IOrderService
 
         try
         {
+            // Step 8: Start the database transaction.
             await _orderRepository.BeginTransactionAsync();
 
+            // Step 9: Save the order, order items, and inventory changes.
             await _orderRepository.AddOrderAsync(order);
             await _orderRepository.AddInventoryTransactionsAsync(inventoryTransactions);
             await _orderRepository.SaveChangesAsync();
 
+            // Step 10: Prepare invoice information.
             var invoiceDto = new InvoicePdfDto
             {
                 OrderId = order.Id,
@@ -188,6 +213,7 @@ public class OrderService : IOrderService
                 TotalAmount = order.TotalAmount,
                 PaymentMethod = order.Payment.PaymentMethod.ToString(),
                 PaymentStatus = order.Payment.PaymentStatus.ToString(),
+
                 Items = order
                     .OrderItems.Select(x => new InvoiceItemDto
                     {
@@ -199,10 +225,12 @@ public class OrderService : IOrderService
                     .ToList(),
             };
 
+            // Step 11: Generate and save the invoice PDF.
             byte[] invoicePdf = InvoicePdfHelper.GenerateInvoicePdf(invoiceDto);
 
             invoiceUrl = await FileStorageHelper.SaveInvoiceAsync(order.Id, invoicePdf);
 
+            // Step 12: Save invoice information in the database.
             var orderDocument = new OrderDocument
             {
                 OrderId = order.Id,
@@ -217,6 +245,7 @@ public class OrderService : IOrderService
 
             await _orderRepository.AddOrderDocumentAsync(orderDocument);
 
+            // Step 13: Create an audit log for the order creation.
             var auditLog = new AuditLog
             {
                 UserId = customerId,
@@ -227,14 +256,19 @@ public class OrderService : IOrderService
             };
 
             await _orderRepository.AddAuditLogAsync(auditLog);
+
+            // Step 14: Save the invoice and audit information.
             await _orderRepository.SaveChangesAsync();
 
+            // Step 15: Commit the complete order transaction.
             await _orderRepository.CommitTransactionAsync();
         }
         catch
         {
+            // Step 16: Roll back the database transaction if anything fails.
             await _orderRepository.RollbackTransactionAsync();
 
+            // Delete the generated invoice if the transaction failed.
             if (!string.IsNullOrWhiteSpace(invoiceUrl))
             {
                 try
@@ -247,6 +281,19 @@ public class OrderService : IOrderService
             throw;
         }
 
+        // Step 17: Queue the order confirmation email.
+        // This happens only after the order transaction has been committed.
+        _backgroundJobClient.Enqueue<SendOrderConfirmationEmailJob>(job =>
+            job.ExecuteAsync(
+                customer.Email,
+                $"{customer.FirstName} {customer.LastName}".Trim(),
+                order.Id,
+                order.OrderDate,
+                order.TotalAmount
+            )
+        );
+
+        // Step 18: Return the newly created order response.
         return new CreatedOrderResponseDto
         {
             Id = order.Id,
@@ -260,6 +307,7 @@ public class OrderService : IOrderService
             PaymentMethod = order.Payment.PaymentMethod.ToString(),
             PaymentStatus = order.Payment.PaymentStatus.ToString(),
             InvoiceUrl = invoiceUrl,
+
             Items = order
                 .OrderItems.Select(x => new CreatedOrderItemResponseDto
                 {

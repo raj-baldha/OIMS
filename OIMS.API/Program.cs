@@ -158,6 +158,7 @@ builder.Services.AddHangfireServer();
 // Background Jobs
 
 builder.Services.AddScoped<LowStockNotificationJob>();
+builder.Services.AddScoped<SendOrderConfirmationEmailJob>();
 
 var app = builder.Build();
 
