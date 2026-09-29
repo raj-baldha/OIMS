@@ -15,12 +15,14 @@ namespace OIMS.Application.Services
         private readonly IProductRepository _productRepository;
         private readonly IConfiguration _configuration;
 
+        /// <summary>Initializes the service with its product repository and configuration.</summary>
         public ProductService(IProductRepository productRepository, IConfiguration configuration)
         {
             _productRepository = productRepository;
             _configuration = configuration;
         }
 
+        /// <summary>Creates a product after validating its request and related records.</summary>
         public async Task<CreatedProductResponseDto> CreateProductAsync(
             CreateProductRequestDto request,
             int userId
@@ -82,6 +84,7 @@ namespace OIMS.Application.Services
             };
         }
 
+        /// <summary>Updates product details and returns the updated product representation.</summary>
         public async Task<CreatedProductResponseDto> UpdateProductAsync(
             int productId,
             UpdateProductRequestDto request,
@@ -147,6 +150,7 @@ namespace OIMS.Application.Services
             };
         }
 
+        /// <summary>Adjusts a product's stock and records the resulting inventory transaction.</summary>
         public async Task<CreatedProductResponseDto> AdjustInventoryAsync(
             int productId,
             AdjustInventoryRequestDto request,
@@ -219,6 +223,7 @@ namespace OIMS.Application.Services
             };
         }
 
+        /// <summary>Deactivates a product and returns its deactivation result.</summary>
         public async Task<DeactivatedProductResponseDto> DeactivateProductAsync(
             int productId,
             int userId
@@ -256,6 +261,7 @@ namespace OIMS.Application.Services
             };
         }
 
+        /// <summary>Retrieves a paginated list of products matching the supplied filters.</summary>
         public async Task<PagedResponseDto<ProductListResponseDto>> GetProductsAsync(
             GetProductsRequestDto request
         )

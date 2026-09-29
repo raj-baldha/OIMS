@@ -9,11 +9,13 @@ namespace OIMS.Infrastructure.Repositories
     {
         private readonly AppDbContext _context;
 
+        /// <summary>Initializes the repository with the application database context.</summary>
         public ProductImageRepository(AppDbContext context)
         {
             _context = context;
         }
 
+        /// <summary>Finds a product by identifier for image operations.</summary>
         public async Task<Product?> GetProductAsync(int productId)
         {
             return await _context.Products.FirstOrDefaultAsync(x =>
@@ -21,6 +23,7 @@ namespace OIMS.Infrastructure.Repositories
             );
         }
 
+        /// <summary>Retrieves the image records associated with a product.</summary>
         public async Task<List<ProductImage>> GetImagesByProductIdAsync(int productId)
         {
             return await _context
@@ -28,6 +31,7 @@ namespace OIMS.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        /// <summary>Counts the image records associated with a product.</summary>
         public async Task<int> GetImageCountAsync(int productId)
         {
             return await _context.ProductImages.CountAsync(x =>
@@ -35,11 +39,13 @@ namespace OIMS.Infrastructure.Repositories
             );
         }
 
+        /// <summary>Adds a product image record to the database context.</summary>
         public async Task AddAsync(ProductImage productImage)
         {
             await _context.ProductImages.AddAsync(productImage);
         }
 
+        /// <summary>Persists pending database changes.</summary>
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();

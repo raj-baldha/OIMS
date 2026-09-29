@@ -19,6 +19,7 @@ namespace OIMS.API.Controllers
         private readonly IProductService _productService;
         private readonly IValidator<CreateProductRequestDto> _createProductValidator;
 
+        /// <summary>Initializes the controller with its product service and request validator.</summary>
         public ProductsController(
             IProductService productService,
             IValidator<CreateProductRequestDto> createProductValidator
@@ -28,6 +29,7 @@ namespace OIMS.API.Controllers
             _createProductValidator = createProductValidator;
         }
 
+        /// <summary>Creates a product from the supplied request.</summary>
         [HttpPost]
         public async Task<IActionResult> CreateProduct(CreateProductRequestDto request)
         {
@@ -51,6 +53,7 @@ namespace OIMS.API.Controllers
             return StatusCode(StatusCodes.Status201Created, response);
         }
 
+        /// <summary>Updates the specified product using the supplied request.</summary>
         [HttpPut("{productId:int}")]
         public async Task<IActionResult> UpdateProduct(
             int productId,
@@ -69,6 +72,7 @@ namespace OIMS.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>Adjusts the stock quantity for the specified product.</summary>
         [HttpPost("{productId:int}/inventory-adjustment")]
         public async Task<IActionResult> AdjustInventory(
             int productId,
@@ -87,6 +91,7 @@ namespace OIMS.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>Deactivates the specified product.</summary>
         [HttpPatch("{productId:int}/deactivate")]
         public async Task<IActionResult> DeactivateProduct(int productId)
         {
@@ -102,6 +107,7 @@ namespace OIMS.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>Returns products matching the query and pagination options.</summary>
         [HttpGet]
         public async Task<IActionResult> GetProducts([FromQuery] GetProductsRequestDto request)
         {

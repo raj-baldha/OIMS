@@ -14,11 +14,13 @@ namespace OIMS.Infrastructure.Repositories
     {
         private readonly AppDbContext _context;
 
+        /// <summary>Initializes the repository with the application database context.</summary>
         public InventoryRepository(AppDbContext context)
         {
             _context = context;
         }
 
+        /// <summary>Retrieves active products at or below their minimum stock levels.</summary>
         public async Task<List<LowStockProductResponseDto>> GetLowStockProductsAsync()
         {
             return await _context
@@ -44,11 +46,13 @@ namespace OIMS.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        /// <summary>Determines whether a non-deleted product exists for the specified ID.</summary>
         public async Task<bool> ProductExistsAsync(int productId)
         {
             return await _context.Products.AnyAsync(x => x.Id == productId && !x.IsDeleted);
         }
 
+        /// <summary>Retrieves paginated inventory transactions for a product.</summary>
         public async Task<(
             List<InventoryHistoryResponseDto> Data,
             int TotalRecords

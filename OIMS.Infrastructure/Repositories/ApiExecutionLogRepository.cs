@@ -11,16 +11,19 @@ namespace OIMS.Infrastructure.Repositories
     {
         private readonly AppDbContext _context;
 
+        /// <summary>Initializes the repository with the application database context.</summary>
         public ApiExecutionLogRepository(AppDbContext context)
         {
             _context = context;
         }
 
+        /// <summary>Adds an API execution log record to the database context.</summary>
         public async Task AddAsync(ApiExecutionLog log)
         {
             await _context.ApiExecutionLogs.AddAsync(log);
         }
 
+        /// <summary>Persists pending database changes.</summary>
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();

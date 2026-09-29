@@ -14,6 +14,7 @@ namespace OIMS.Application.Services
         private readonly IPasswordHelper _passwordHelper;
         private readonly IEmailService _emailService;
 
+        /// <summary>Initializes the service with its user repository and supporting dependencies.</summary>
         public UserService(
             IUserRepository userRepository,
             IPasswordHelper passwordHelper,
@@ -25,6 +26,7 @@ namespace OIMS.Application.Services
             _emailService = emailService;
         }
 
+        /// <summary>Creates a user account and returns its response representation.</summary>
         public async Task<CreatedUserResponseDto> CreateUserAsync(CreateUserRequestDto request)
         {
             bool emailExists = await _userRepository.IsEmailExistsAsync(request.Email);

@@ -15,11 +15,13 @@ namespace OIMS.API.Controllers
     {
         private readonly IProductImageService _productImageService;
 
+        /// <summary>Initializes the controller with its product image service.</summary>
         public ProductImageController(IProductImageService productImageService)
         {
             _productImageService = productImageService;
         }
 
+        /// <summary>Uploads one or more images for the specified product.</summary>
         [HttpPost]
         public async Task<IActionResult> UploadImages(
             int productId,

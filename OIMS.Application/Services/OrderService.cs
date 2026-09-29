@@ -16,12 +16,14 @@ public class OrderService : IOrderService
     private readonly IOrderRepository _orderRepository;
     private readonly IConfiguration _configuration;
 
+    /// <summary>Initializes the service with its order repository and configuration.</summary>
     public OrderService(IOrderRepository orderRepository, IConfiguration configuration)
     {
         _orderRepository = orderRepository;
         _configuration = configuration;
     }
 
+    /// <summary>Creates an order, updates inventory, records related data, and generates its invoice.</summary>
     public async Task<CreatedOrderResponseDto> CreateOrderAsync(
         CreateOrderRequestDto request,
         int customerId
@@ -271,6 +273,7 @@ public class OrderService : IOrderService
         };
     }
 
+    /// <summary>Changes an order's status and records the status history.</summary>
     public async Task UpdateOrderStatusAsync(
         int orderId,
         UpdateOrderStatusRequestDto request,
@@ -324,6 +327,7 @@ public class OrderService : IOrderService
         await _orderRepository.SaveChangesAsync();
     }
 
+    /// <summary>Cancels an order when the caller is authorized to do so.</summary>
     public async Task CancelOrderAsync(int orderId, int userId, string role)
     {
         var order = await _orderRepository.GetOrderForStatusUpdateAsync(orderId);
@@ -363,6 +367,7 @@ public class OrderService : IOrderService
         await _orderRepository.SaveChangesAsync();
     }
 
+    /// <summary>Retrieves paginated orders filtered by the request and caller's access scope.</summary>
     public async Task<PagedResponseDto<OrderListResponseDto>> GetOrdersAsync(
         GetOrdersRequestDto request,
         int userId,

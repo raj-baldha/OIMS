@@ -15,6 +15,7 @@ namespace OIMS.Application.Services
         private readonly IJwtHelper _jwtHelper;
         private readonly IMapper _mapper;
 
+        /// <summary>Initializes the service with user, password, and token dependencies.</summary>
         public AuthService(
             IUserRepository userRepository,
             IPasswordHelper passwordHelper,
@@ -28,6 +29,7 @@ namespace OIMS.Application.Services
             _mapper = mapper;
         }
 
+        /// <summary>Validates staff credentials and creates the corresponding login result and token.</summary>
         public async Task<(LoginResponseDto User, string Token)> LoginAsync(LoginRequestDto request)
         {
             request.Email = request.Email.Trim();

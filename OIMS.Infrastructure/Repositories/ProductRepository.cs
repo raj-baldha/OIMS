@@ -15,32 +15,38 @@ namespace OIMS.Infrastructure.Repositories
         private readonly AppDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
+        /// <summary>Initializes the repository with its database and HTTP context dependencies.</summary>
         public ProductRepository(AppDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
         }
 
+        /// <summary>Determines whether a product with the specified SKU exists.</summary>
         public async Task<bool> IsSkuExistsAsync(string sku)
         {
             return await _context.Products.AnyAsync(x => x.Sku == sku && !x.IsDeleted);
         }
 
+        /// <summary>Determines whether the specified category exists.</summary>
         public async Task<bool> IsCategoryExistsAsync(int categoryId)
         {
             return await _context.Categories.AnyAsync(x => x.Id == categoryId && !x.IsDeleted);
         }
 
+        /// <summary>Adds a product to the database context.</summary>
         public async Task AddAsync(Product product)
         {
             await _context.Products.AddAsync(product);
         }
 
+        /// <summary>Persists pending database changes.</summary>
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>Finds a product by identifier.</summary>
         public async Task<Product?> GetByIdAsync(int productId)
         {
             return await _context.Products.FirstOrDefaultAsync(x =>
@@ -48,6 +54,7 @@ namespace OIMS.Infrastructure.Repositories
             );
         }
 
+        /// <summary>Determines whether another product uses the specified SKU.</summary>
         public async Task<bool> IsSkuExistsForOtherProductAsync(string sku, int productId)
         {
             return await _context.Products.AnyAsync(x =>
@@ -55,6 +62,7 @@ namespace OIMS.Infrastructure.Repositories
             );
         }
 
+        /// <summary>Finds a product by identifier for inventory operations.</summary>
         public async Task<Product?> GetByIdForInventoryAsync(int productId)
         {
             return await _context.Products.FirstOrDefaultAsync(x =>
@@ -62,11 +70,13 @@ namespace OIMS.Infrastructure.Repositories
             );
         }
 
+        /// <summary>Adds an inventory transaction to the database context.</summary>
         public async Task AddInventoryTransactionAsync(InventoryTransaction transaction)
         {
             await _context.InventoryTransactions.AddAsync(transaction);
         }
 
+        /// <summary>Retrieves paginated products matching the supplied filters.</summary>
         public async Task<(List<ProductListResponseDto> Data, int TotalRecords)> GetProductsAsync(
             GetProductsRequestDto request,
             int pageSize

@@ -19,6 +19,7 @@ namespace OIMS.Application.Services
         private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
 
+        /// <summary>Initializes the service with its customer, audit, and mapping dependencies.</summary>
         public CustomerService(
             ICustomerRepository customerRepository,
             IPasswordHelper passwordHelper,
@@ -34,6 +35,7 @@ namespace OIMS.Application.Services
             _mapper = mapper;
         }
 
+        /// <summary>Creates a customer account and returns its response representation.</summary>
         public async Task<CreatedCustomerResponseDto> CreateCustomerAsync(
             CreateCustomerRequestDto request,
             int userId
@@ -102,6 +104,7 @@ namespace OIMS.Application.Services
             };
         }
 
+        /// <summary>Retrieves a paginated list of customers matching the requested filters.</summary>
         public async Task<PagedResponseDto<CustomerListResponseDto>> GetCustomersAsync(
             GetCustomersRequestDto request,
             string role,
@@ -135,6 +138,7 @@ namespace OIMS.Application.Services
             return await _customerRepository.GetCustomersAsync(request, pageSize, customerId);
         }
 
+        /// <summary>Updates a customer's details and returns the updated customer representation.</summary>
         public async Task<CreatedCustomerResponseDto> UpdateCustomerAsync(
             int id,
             UpdateCustomerRequestDto request,
@@ -177,6 +181,7 @@ namespace OIMS.Application.Services
             };
         }
 
+        /// <summary>Deactivates the specified customer and records the acting user.</summary>
         public async Task DeactiveCustomersAsync(int id, int userId)
         {
             var customer = await _customerRepository.GetByIdAsync(id);

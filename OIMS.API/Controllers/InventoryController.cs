@@ -14,11 +14,13 @@ namespace OIMS.API.Controllers
     {
         private readonly IInventoryService _inventoryService;
 
+        /// <summary>Initializes the controller with its inventory service.</summary>
         public InventoryController(IInventoryService inventoryService)
         {
             _inventoryService = inventoryService;
         }
 
+        /// <summary>Returns the products currently below their low-stock threshold.</summary>
         [HttpGet("low-stock")]
         public async Task<IActionResult> GetLowStockProducts()
         {
@@ -32,6 +34,7 @@ namespace OIMS.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>Returns paginated inventory transaction history matching the query.</summary>
         [HttpGet("{productId:int}/inventory-history")]
         public async Task<IActionResult> GetInventoryHistory(
             int productId,

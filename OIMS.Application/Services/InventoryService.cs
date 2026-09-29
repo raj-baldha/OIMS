@@ -13,6 +13,7 @@ namespace OIMS.Application.Services
         private readonly IInventoryRepository _inventoryRepository;
         private readonly IConfiguration _configuration;
 
+        /// <summary>Initializes the service with its inventory repository.</summary>
         public InventoryService(
             IInventoryRepository inventoryRepository,
             IConfiguration configuration
@@ -22,11 +23,13 @@ namespace OIMS.Application.Services
             _configuration = configuration;
         }
 
+        /// <summary>Retrieves products whose available quantities are below their stock thresholds.</summary>
         public async Task<List<LowStockProductResponseDto>> GetLowStockProductsAsync()
         {
             return await _inventoryRepository.GetLowStockProductsAsync();
         }
 
+        /// <summary>Retrieves paginated inventory history matching the supplied filters.</summary>
         public async Task<PagedResponseDto<InventoryHistoryResponseDto>> GetInventoryHistoryAsync(
             int productId,
             GetInventoryHistoryRequestDto request

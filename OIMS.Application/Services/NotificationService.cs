@@ -9,11 +9,13 @@ namespace OIMS.Application.Services
     {
         private readonly INotificationRepository _notificationRepository;
 
+        /// <summary>Initializes the service with its notification repository.</summary>
         public NotificationService(INotificationRepository notificationRepository)
         {
             _notificationRepository = notificationRepository;
         }
 
+        /// <summary>Creates notifications for products that have reached low-stock conditions.</summary>
         public async Task CreateLowStockNotificationsAsync(
             List<int> userIds,
             List<LowStockNotificationItemDto> products

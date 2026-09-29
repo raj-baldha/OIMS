@@ -15,11 +15,13 @@ namespace OIMS.API.Controllers
     {
         private readonly ICategoryService _categoryService;
 
+        /// <summary>Initializes the controller with its category service.</summary>
         public CategoriesController(ICategoryService categoryService)
         {
             _categoryService = categoryService;
         }
 
+        /// <summary>Creates a category from the supplied request.</summary>
         [HttpPost]
         public async Task<IActionResult> CreateCategory(CreateCategoryRequestDto request)
         {

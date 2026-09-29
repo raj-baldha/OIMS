@@ -14,11 +14,13 @@ namespace OIMS.API.Controllers
     {
         private readonly IUserService _userService;
 
+        /// <summary>Initializes the controller with its user service.</summary>
         public UsersController(IUserService userService)
         {
             _userService = userService;
         }
 
+        /// <summary>Creates a user account from the supplied request.</summary>
         [Authorize(Roles = "Administrator")]
         [HttpPost]
         public async Task<IActionResult> CreateUser(CreateUserRequestDto request)

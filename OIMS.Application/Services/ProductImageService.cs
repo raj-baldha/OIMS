@@ -25,6 +25,7 @@ public class ProductImageService : IProductImageService
     private readonly IProductImageRepository _productImageRepository;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
+    /// <summary>Initializes the service with its product image storage and persistence dependencies.</summary>
     public ProductImageService(
         IProductImageRepository productImageRepository,
         IHttpContextAccessor httpContextAccessor
@@ -34,6 +35,7 @@ public class ProductImageService : IProductImageService
         _httpContextAccessor = httpContextAccessor;
     }
 
+    /// <summary>Validates and stores images for a product, then returns their response details.</summary>
     public async Task<List<ProductImageResponseDto>> UploadImagesAsync(
         int productId,
         List<IFormFile> files,
@@ -107,6 +109,7 @@ public class ProductImageService : IProductImageService
             .ToList();
     }
 
+    /// <summary>Validates an uploaded image file against the supported file requirements.</summary>
     private static void ValidateFile(IFormFile file)
     {
         if (file is null || file.Length == 0)

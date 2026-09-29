@@ -15,11 +15,13 @@ public class OrdersController : ControllerBase
 {
     private readonly IOrderService _orderService;
 
+    /// <summary>Initializes the controller with its order service.</summary>
     public OrdersController(IOrderService orderService)
     {
         _orderService = orderService;
     }
 
+    /// <summary>Creates an order for the authenticated customer.</summary>
     [Authorize(Roles = "Customer")]
     [HttpPost]
     public async Task<IActionResult> CreateOrder(CreateOrderRequestDto request)
@@ -36,6 +38,7 @@ public class OrdersController : ControllerBase
         return StatusCode(StatusCodes.Status201Created, response);
     }
 
+    /// <summary>Updates an order's status using the supplied request.</summary>
     [HttpPatch("{orderId:int}/status")]
     [Authorize(Roles = "Administrator,Manager,Employee")]
     public async Task<IActionResult> UpdateOrderStatus(
@@ -55,6 +58,7 @@ public class OrdersController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary>Cancels the specified order when permitted for the current user.</summary>
     [HttpPatch("{orderId:int}/cancel")]
     [Authorize(Roles = "Customer,Administrator,Manager,Employee")]
     public async Task<IActionResult> CancelOrder(int orderId)
@@ -69,6 +73,7 @@ public class OrdersController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary>Returns orders matching the query and current user's access scope.</summary>
     [HttpGet]
     [Authorize(Roles = "Customer,Administrator,Manager,Employee")]
     public async Task<IActionResult> GetOrders([FromQuery] GetOrdersRequestDto request)

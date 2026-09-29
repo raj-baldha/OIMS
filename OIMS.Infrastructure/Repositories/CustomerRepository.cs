@@ -16,16 +16,19 @@ namespace OIMS.Infrastructure.Repositories
     {
         private readonly AppDbContext _context;
 
+        /// <summary>Initializes the repository with the application database context.</summary>
         public CustomerRepository(AppDbContext context)
         {
             _context = context;
         }
 
+        /// <summary>Determines whether a customer with the specified email exists.</summary>
         public async Task<bool> IsEmailExistsAsync(string email)
         {
             return await _context.Customers.AnyAsync(x => x.Email == email && !x.IsDeleted);
         }
 
+        /// <summary>Finds a customer by email address.</summary>
         public async Task<Customer?> GetByEmailAsync(string email)
         {
             return await _context.Customers.FirstOrDefaultAsync(x =>
@@ -33,16 +36,19 @@ namespace OIMS.Infrastructure.Repositories
             );
         }
 
+        /// <summary>Adds a customer to the database context.</summary>
         public async Task AddAsync(Customer customer)
         {
             await _context.Customers.AddAsync(customer);
         }
 
+        /// <summary>Persists pending database changes.</summary>
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>Retrieves customers matching the filters and pagination options.</summary>
         public async Task<PagedResponseDto<CustomerListResponseDto>> GetCustomersAsync(
             GetCustomersRequestDto request,
             int pageSize,
@@ -131,6 +137,7 @@ namespace OIMS.Infrastructure.Repositories
             };
         }
 
+        /// <summary>Finds a customer by its identifier.</summary>
         public async Task<Customer?> GetByIdAsync(int id)
         {
             return await _context.Customers.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);

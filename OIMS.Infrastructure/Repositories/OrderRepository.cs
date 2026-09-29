@@ -12,11 +12,13 @@ namespace OIMS.Infrastructure.Repositories
     {
         private readonly AppDbContext _context;
 
+        /// <summary>Initializes the repository with the application database context.</summary>
         public OrderRepository(AppDbContext context)
         {
             _context = context;
         }
 
+        /// <summary>Finds an active customer by identifier.</summary>
         public async Task<Customer?> GetCustomerAsync(int customerId)
         {
             return await _context
@@ -24,6 +26,7 @@ namespace OIMS.Infrastructure.Repositories
                 .FirstOrDefaultAsync(x => x.Id == customerId && !x.IsDeleted && x.IsActive);
         }
 
+        /// <summary>Retrieves active products whose identifiers are in the supplied list.</summary>
         public async Task<List<Product>> GetProductsAsync(List<int> productIds)
         {
             return await _context
@@ -31,31 +34,37 @@ namespace OIMS.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        /// <summary>Adds an order to the database context.</summary>
         public async Task AddOrderAsync(Order order)
         {
             await _context.Orders.AddAsync(order);
         }
 
+        /// <summary>Adds inventory transactions to the database context.</summary>
         public async Task AddInventoryTransactionsAsync(List<InventoryTransaction> transactions)
         {
             await _context.InventoryTransactions.AddRangeAsync(transactions);
         }
 
+        /// <summary>Adds an audit log entry to the database context.</summary>
         public async Task AddAuditLogAsync(AuditLog auditLog)
         {
             await _context.AuditLogs.AddAsync(auditLog);
         }
 
+        /// <summary>Persists pending database changes.</summary>
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>Begins a database transaction for the current unit of work.</summary>
         public async Task BeginTransactionAsync()
         {
             await _context.Database.BeginTransactionAsync();
         }
 
+        /// <summary>Commits the active database transaction, if one exists.</summary>
         public async Task CommitTransactionAsync()
         {
             var transaction = _context.Database.CurrentTransaction;
@@ -66,6 +75,7 @@ namespace OIMS.Infrastructure.Repositories
             }
         }
 
+        /// <summary>Rolls back the active database transaction, if one exists.</summary>
         public async Task RollbackTransactionAsync()
         {
             var transaction = _context.Database.CurrentTransaction;
@@ -76,6 +86,7 @@ namespace OIMS.Infrastructure.Repositories
             }
         }
 
+        /// <summary>Finds an order with its items and payment for a status update.</summary>
         public async Task<Order?> GetOrderForStatusUpdateAsync(int orderId)
         {
             return await _context
@@ -84,11 +95,13 @@ namespace OIMS.Infrastructure.Repositories
                 .FirstOrDefaultAsync(x => x.Id == orderId && !x.IsDeleted);
         }
 
+        /// <summary>Adds an order status history entry to the database context.</summary>
         public async Task AddOrderStatusHistoryAsync(OrderStatusHistory statusHistory)
         {
             await _context.OrderStatusHistories.AddAsync(statusHistory);
         }
 
+        /// <summary>Retrieves paginated orders matching the supplied filters and customer scope.</summary>
         public async Task<(List<OrderListResponseDto> Data, int TotalRecords)> GetOrdersAsync(
             GetOrdersRequestDto request,
             int pageSize,
@@ -206,6 +219,7 @@ namespace OIMS.Infrastructure.Repositories
             return (data, totalRecords);
         }
 
+        /// <summary>Finds an order and its related data needed to generate an invoice.</summary>
         public async Task<Order?> GetOrderForInvoiceAsync(int orderId)
         {
             return await _context
@@ -217,6 +231,7 @@ namespace OIMS.Infrastructure.Repositories
                 .FirstOrDefaultAsync(x => x.Id == orderId && !x.IsDeleted);
         }
 
+        /// <summary>Adds an order document to the database context.</summary>
         public async Task AddOrderDocumentAsync(OrderDocument orderDocument)
         {
             await _context.OrderDocuments.AddAsync(orderDocument);

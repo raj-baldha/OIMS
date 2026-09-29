@@ -14,11 +14,13 @@ namespace OIMS.API.Controllers
     {
         private readonly ICustomerService _customerService;
 
+        /// <summary>Initializes the controller with its customer service.</summary>
         public CustomersController(ICustomerService customerService)
         {
             _customerService = customerService;
         }
 
+        /// <summary>Creates a customer account from the supplied request.</summary>
         [Authorize(Roles = "Administrator,Manager,Employee")]
         [HttpPost]
         public async Task<IActionResult> CreateCustomer(CreateCustomerRequestDto request)
@@ -35,6 +37,7 @@ namespace OIMS.API.Controllers
             return StatusCode(StatusCodes.Status201Created, response);
         }
 
+        /// <summary>Returns a filtered, paginated list of customers.</summary>
         [Authorize(Roles = "Administrator,Manager,Employee,Customer")]
         [HttpGet]
         public async Task<IActionResult> GetCustomers([FromQuery] GetCustomersRequestDto request)
@@ -53,6 +56,7 @@ namespace OIMS.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>Updates the customer identified by the supplied ID.</summary>
         [Authorize(Roles = "Administrator,Manager,Employee")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCustomer(int id, UpdateCustomerRequestDto request)
@@ -69,6 +73,7 @@ namespace OIMS.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>Deactivates the customer identified by the supplied ID.</summary>
         [Authorize(Roles = "Administrator,Manager,Employee")]
         [HttpPost("{id}/deactivate")]
         public async Task<IActionResult> DeactivateCustomer(int id)

@@ -15,6 +15,7 @@ namespace OIMS.Application.Services
         private readonly IJwtHelper _jwtHelper;
         private readonly IMapper _mapper;
 
+        /// <summary>Initializes the service with customer authentication dependencies.</summary>
         public CustomerAuthService(
             ICustomerRepository customerRepository,
             IPasswordHelper passwordHelper,
@@ -28,6 +29,7 @@ namespace OIMS.Application.Services
             _mapper = mapper;
         }
 
+        /// <summary>Validates customer credentials and creates the corresponding login result and token.</summary>
         public async Task<(CustomerLoginResponseDto Customer, string Token)> LoginAsync(
             CustomerLoginRequestDto request
         )

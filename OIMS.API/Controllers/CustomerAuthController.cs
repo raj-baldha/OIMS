@@ -14,6 +14,7 @@ namespace OIMS.API.Controllers
         private readonly ICustomerAuthService _customerAuthService;
         private readonly IConfiguration _configuration;
 
+        /// <summary>Initializes the controller with its customer authentication dependencies.</summary>
         public CustomerAuthController(
             ICustomerAuthService customerAuthService,
             IConfiguration configuration
@@ -23,6 +24,7 @@ namespace OIMS.API.Controllers
             _configuration = configuration;
         }
 
+        /// <summary>Authenticates customer credentials and returns the login result.</summary>
         [HttpPost("login")]
         public async Task<IActionResult> Login(CustomerLoginRequestDto request)
         {
@@ -38,6 +40,7 @@ namespace OIMS.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>Ends the customer session by clearing its authentication cookie.</summary>
         [HttpPost("logout")]
         public IActionResult Logout()
         {

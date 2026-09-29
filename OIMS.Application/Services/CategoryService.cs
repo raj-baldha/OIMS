@@ -13,12 +13,14 @@ namespace OIMS.Application.Services
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
 
+        /// <summary>Initializes the service with its category repository and mapper.</summary>
         public CategoryService(ICategoryRepository categoryRepository, IMapper mapper)
         {
             _categoryRepository = categoryRepository;
             _mapper = mapper;
         }
 
+        /// <summary>Creates a category and returns its response representation.</summary>
         public async Task<CreatedCategoryResponseDto> CreateCategoryAsync(
             CreateCategoryRequestDto request,
             int userId
