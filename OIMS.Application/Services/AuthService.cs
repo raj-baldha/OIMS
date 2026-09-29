@@ -30,6 +30,8 @@ namespace OIMS.Application.Services
 
         public async Task<(LoginResponseDto User, string Token)> LoginAsync(LoginRequestDto request)
         {
+            request.Email = request.Email.Trim();
+
             var user = await _userRepository.GetByEmailAsync(request.Email);
 
             if (user == null)

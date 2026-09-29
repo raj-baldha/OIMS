@@ -4,4 +4,5 @@
   <Project Path="OIMS.Data/OIMS.Data.csproj" />
   <Project Path="OIMS.Domain/OIMS.Domain.csproj" />
   <Project Path="OIMS.Infrastructure/OIMS.Infrastructure.csproj" />
+  <Project Path="OIMS.Tests/OIMS.Tests.csproj" Id="c2d37ca0-69de-499c-a77f-665b0aa78c43" />
 </Solution>

@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using OIMS.Application.DTOs.Products;
 using OIMS.Application.DTOs.Request;
 using OIMS.Application.DTOs.Response;
 using OIMS.Application.Helpers;
@@ -11,10 +13,12 @@ namespace OIMS.Infrastructure.Repositories
     public class ProductRepository : IProductRepository
     {
         private readonly AppDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ProductRepository(AppDbContext context)
+        public ProductRepository(AppDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<bool> IsSkuExistsAsync(string sku)
@@ -68,7 +72,11 @@ namespace OIMS.Infrastructure.Repositories
             int pageSize
         )
         {
-            var query = _context.Products.AsNoTracking().Where(x => !x.IsDeleted).AsQueryable();
+            var query = _context
+                .Products.Include(x => x.ProductImages)
+                .Where(x => !x.IsDeleted)
+                .AsNoTracking()
+                .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(request.Search))
             {
@@ -126,6 +134,8 @@ namespace OIMS.Infrastructure.Repositories
 
             int skip = (page - 1) * pageSize;
 
+            var httpRequest = _httpContextAccessor.HttpContext!.Request;
+
             var data = await query
                 .Skip(skip)
                 .Take(pageSize)
@@ -141,6 +151,20 @@ namespace OIMS.Infrastructure.Repositories
                     QuantityOnHand = x.QuantityOnHand,
                     MinStockLevel = x.MinStockLevel,
                     IsActive = x.IsActive,
+
+                    Images = x
+                        .ProductImages.Where(image => !image.IsDeleted)
+                        .Select(image => new ProductImageResponseDto
+                        {
+                            Id = image.Id,
+                            ProductId = image.ProductId,
+                            FileUrl = httpRequest.Scheme + "://" + httpRequest.Host + image.FileUrl,
+                            OriginalFileName = image.OriginalFileName,
+                            ContentType = image.ContentType,
+                            FileSize = image.FileSize,
+                            CreatedAt = image.CreatedAt,
+                        })
+                        .ToList(),
                 })
                 .ToListAsync();
 

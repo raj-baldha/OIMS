@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using OIMS.Application.DTOs.Products;
 
 namespace OIMS.Application.DTOs.Response
 {
@@ -15,5 +16,7 @@ namespace OIMS.Application.DTOs.Response
         public int QuantityOnHand { get; set; }
         public int MinStockLevel { get; set; }
         public bool IsActive { get; set; }
+
+        public List<ProductImageResponseDto> Images { get; set; } = new();
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using OIMS.Application.DTOs.Products;
 
 namespace OIMS.Application.DTOs.Response
 {
@@ -17,5 +18,7 @@ namespace OIMS.Application.DTOs.Response
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public int? CreatedBy { get; set; }
+
+        public List<ProductImageResponseDto> Images { get; set; } = new();
     }
 }
