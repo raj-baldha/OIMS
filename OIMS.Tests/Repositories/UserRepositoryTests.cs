@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +24,9 @@ namespace OIMS.Tests.Repository
 
         private static User CreateSampleUser(
             string email = "test@example.com",
-            bool isDeleted = false
+            bool isDeleted = false,
+            string role = "Employee",
+            bool isActive = true
         )
         {
             return new User
@@ -30,8 +34,8 @@ namespace OIMS.Tests.Repository
                 Username = "testuser",
                 Email = email,
                 PasswordHash = "hashed-password-123",
-                Role = "Employee",
-                IsActive = true,
+                Role = role,
+                IsActive = isActive,
                 IsDeleted = isDeleted,
                 CreatedAt = DateTime.UtcNow,
             };
@@ -151,6 +155,113 @@ namespace OIMS.Tests.Repository
             savedUser.Should().NotBeNull();
             savedUser!.Id.Should().BeGreaterThan(0);
             savedUser.Email.Should().Be("persisted@example.com");
+        }
+
+        [Fact]
+        public async Task GetActiveUsersByRolesAsync_ShouldReturnOnlyActiveAndNonDeletedUsersMatchingRoles()
+        {
+            using var context = CreateDbContext();
+
+            var activeAdmin = CreateSampleUser(
+                "admin@example.com",
+                isDeleted: false,
+                role: "Administrator",
+                isActive: true
+            );
+            var activeManager = CreateSampleUser(
+                "manager@example.com",
+                isDeleted: false,
+                role: "Manager",
+                isActive: true
+            );
+            var inactiveAdmin = CreateSampleUser(
+                "inactive_admin@example.com",
+                isDeleted: false,
+                role: "Administrator",
+                isActive: false
+            );
+            var deletedManager = CreateSampleUser(
+                "deleted_manager@example.com",
+                isDeleted: true,
+                role: "Manager",
+                isActive: true
+            );
+            var activeEmployee = CreateSampleUser(
+                "employee@example.com",
+                isDeleted: false,
+                role: "Employee",
+                isActive: true
+            );
+
+            await context.Users.AddRangeAsync(
+                activeAdmin,
+                activeManager,
+                inactiveAdmin,
+                deletedManager,
+                activeEmployee
+            );
+            await context.SaveChangesAsync();
+
+            var repository = new UserRepository(context);
+            var targetRoles = new List<string> { "Administrator", "Manager" };
+
+            var result = await repository.GetActiveUsersByRolesAsync(targetRoles);
+
+            result.Should().NotBeNull();
+            result.Should().HaveCount(2);
+            result
+                .Select(u => u.Email)
+                .Should()
+                .BeEquivalentTo(new[] { "admin@example.com", "manager@example.com" });
+            result.Should().OnlyContain(u => u.IsActive && !u.IsDeleted);
+            result.Should().OnlyContain(u => targetRoles.Contains(u.Role));
+        }
+
+        [Fact]
+        public async Task GetActiveUsersByRolesAsync_ShouldReturnEmptyList_WhenNoUsersMatchSpecifiedRoles()
+        {
+            using var context = CreateDbContext();
+
+            var activeEmployee = CreateSampleUser(
+                "employee@example.com",
+                isDeleted: false,
+                role: "Employee",
+                isActive: true
+            );
+
+            await context.Users.AddAsync(activeEmployee);
+            await context.SaveChangesAsync();
+
+            var repository = new UserRepository(context);
+            var targetRoles = new List<string> { "Administrator", "Manager" };
+
+            var result = await repository.GetActiveUsersByRolesAsync(targetRoles);
+
+            result.Should().NotBeNull();
+            result.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task GetActiveUsersByRolesAsync_ShouldReturnEmptyList_WhenRolesListIsEmpty()
+        {
+            using var context = CreateDbContext();
+
+            var activeAdmin = CreateSampleUser(
+                "admin@example.com",
+                isDeleted: false,
+                role: "Administrator",
+                isActive: true
+            );
+
+            await context.Users.AddAsync(activeAdmin);
+            await context.SaveChangesAsync();
+
+            var repository = new UserRepository(context);
+
+            var result = await repository.GetActiveUsersByRolesAsync(new List<string>());
+
+            result.Should().NotBeNull();
+            result.Should().BeEmpty();
         }
     }
 }

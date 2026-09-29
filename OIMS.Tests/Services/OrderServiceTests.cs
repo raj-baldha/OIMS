@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Hangfire;
+using Hangfire.Common;
+using Hangfire.States;
 using Microsoft.Extensions.Configuration;
 using Moq;
+using OIMS.Application.BackgroundJobs;
 using OIMS.Application.DTOs.Orders;
 using OIMS.Application.DTOs.Request;
 using OIMS.Application.Interfaces.Repositories;
@@ -19,16 +24,19 @@ namespace OIMS.Tests.Services
     {
         private readonly Mock<IOrderRepository> _orderRepositoryMock;
         private readonly Mock<IConfiguration> _configurationMock;
+        private readonly Mock<IBackgroundJobClient> _backgroundJobClientMock;
         private readonly OrderService _orderService;
 
         public OrderServiceTests()
         {
             _orderRepositoryMock = new Mock<IOrderRepository>();
             _configurationMock = new Mock<IConfiguration>();
+            _backgroundJobClientMock = new Mock<IBackgroundJobClient>();
 
             _orderService = new OrderService(
                 _orderRepositoryMock.Object,
-                _configurationMock.Object
+                _configurationMock.Object,
+                _backgroundJobClientMock.Object
             );
         }
 
@@ -55,6 +63,34 @@ namespace OIMS.Tests.Services
                 .Should()
                 .ThrowAsync<NotFoundException>()
                 .WithMessage("Customer not found or inactive.");
+        }
+
+        [Fact]
+        public async Task CreateOrderAsync_ShouldThrowBadRequestException_WhenItemsListIsNull()
+        {
+            var customer = new Customer
+            {
+                Id = 1,
+                FirstName = "John",
+                LastName = "Doe",
+                Email = "john@example.com",
+            };
+
+            var request = new CreateOrderRequestDto
+            {
+                ShippingAddress = "123 Street",
+                PaymentMethod = "Card",
+                Items = null!,
+            };
+
+            _orderRepositoryMock.Setup(repo => repo.GetCustomerAsync(1)).ReturnsAsync(customer);
+
+            var action = async () => await _orderService.CreateOrderAsync(request, 1);
+
+            await action
+                .Should()
+                .ThrowAsync<BadRequestException>()
+                .WithMessage("Order must contain at least one product.");
         }
 
         [Fact]
@@ -85,8 +121,13 @@ namespace OIMS.Tests.Services
                 .WithMessage("Order must contain at least one product.");
         }
 
-        [Fact]
-        public async Task CreateOrderAsync_ShouldThrowBadRequestException_WhenShippingAddressIsBlank()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public async Task CreateOrderAsync_ShouldThrowBadRequestException_WhenShippingAddressIsBlank(
+            string? address
+        )
         {
             var customer = new Customer
             {
@@ -98,7 +139,7 @@ namespace OIMS.Tests.Services
 
             var request = new CreateOrderRequestDto
             {
-                ShippingAddress = "   ",
+                ShippingAddress = address!,
                 PaymentMethod = "Card",
                 Items = new List<CreateOrderItemRequestDto>
                 {
@@ -316,6 +357,156 @@ namespace OIMS.Tests.Services
                 .Should()
                 .ThrowAsync<BadRequestException>()
                 .WithMessage("Insufficient stock for product 'Gaming Laptop'.");
+        }
+
+        [Fact]
+        public async Task CreateOrderAsync_ShouldSucceedAndEnqueueEmail_WhenDataIsValid()
+        {
+            QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
+            int customerId = 1;
+            var customer = new Customer
+            {
+                Id = customerId,
+                FirstName = "Clark",
+                LastName = "Kent",
+                Email = "clark@dailyplanet.com",
+            };
+
+            var request = new CreateOrderRequestDto
+            {
+                ShippingAddress = "344 Clinton St",
+                PaymentMethod = "Card",
+                Items = new List<CreateOrderItemRequestDto>
+                {
+                    new CreateOrderItemRequestDto { ProductId = 10, Quantity = 2 },
+                },
+            };
+
+            var product = new Product
+            {
+                Id = 10,
+                Name = "Desk Lamp",
+                SellingPrice = 25m,
+                QuantityOnHand = 10,
+                Version = 1,
+            };
+
+            _orderRepositoryMock.Setup(r => r.GetCustomerAsync(customerId)).ReturnsAsync(customer);
+
+            _orderRepositoryMock
+                .Setup(r => r.GetProductsAsync(It.IsAny<List<int>>()))
+                .ReturnsAsync(new List<Product> { product });
+
+            _orderRepositoryMock.Setup(r => r.BeginTransactionAsync()).Returns(Task.CompletedTask);
+
+            _orderRepositoryMock
+                .Setup(r => r.AddOrderAsync(It.IsAny<Order>()))
+                .Returns(Task.CompletedTask);
+
+            _orderRepositoryMock
+                .Setup(r => r.AddInventoryTransactionsAsync(It.IsAny<List<InventoryTransaction>>()))
+                .Returns(Task.CompletedTask);
+
+            _orderRepositoryMock
+                .Setup(r => r.AddOrderDocumentAsync(It.IsAny<OrderDocument>()))
+                .Returns(Task.CompletedTask);
+
+            _orderRepositoryMock
+                .Setup(r => r.AddAuditLogAsync(It.IsAny<AuditLog>()))
+                .Returns(Task.CompletedTask);
+
+            _orderRepositoryMock.Setup(r => r.SaveChangesAsync()).Returns(Task.CompletedTask);
+
+            _orderRepositoryMock.Setup(r => r.CommitTransactionAsync()).Returns(Task.CompletedTask);
+
+            var result = await _orderService.CreateOrderAsync(request, customerId);
+
+            result.Should().NotBeNull();
+            result.CustomerId.Should().Be(customerId);
+            result.Subtotal.Should().Be(50m);
+            result.TotalAmount.Should().Be(50m);
+            result.PaymentMethod.Should().Be("Card");
+            result.PaymentStatus.Should().Be("Pending");
+            result.InvoiceUrl.Should().NotBeNullOrWhiteSpace();
+            result.Items.Should().HaveCount(1);
+            result.Items[0].ProductId.Should().Be(10);
+            result.Items[0].ProductName.Should().Be("Desk Lamp");
+            result.Items[0].Quantity.Should().Be(2);
+            result.Items[0].UnitPrice.Should().Be(25m);
+            result.Items[0].LineTotal.Should().Be(50m);
+
+            product.QuantityOnHand.Should().Be(8);
+            product.Version.Should().Be(2);
+
+            _orderRepositoryMock.Verify(r => r.CommitTransactionAsync(), Times.Once);
+            _orderRepositoryMock.Verify(r => r.RollbackTransactionAsync(), Times.Never);
+            _backgroundJobClientMock.Verify(
+                x => x.Create(It.IsAny<Job>(), It.IsAny<EnqueuedState>()),
+                Times.Once
+            );
+        }
+
+        [Fact]
+        public async Task CreateOrderAsync_ShouldRollbackAndRethrow_WhenRepositoryFails()
+        {
+            int customerId = 1;
+            var customer = new Customer
+            {
+                Id = customerId,
+                FirstName = "Diana",
+                LastName = "Prince",
+                Email = "diana@themyscira.com",
+            };
+
+            var request = new CreateOrderRequestDto
+            {
+                ShippingAddress = "Gateway City",
+                PaymentMethod = "Card",
+                Items = new List<CreateOrderItemRequestDto>
+                {
+                    new CreateOrderItemRequestDto { ProductId = 20, Quantity = 1 },
+                },
+            };
+
+            var product = new Product
+            {
+                Id = 20,
+                Name = "Shield",
+                SellingPrice = 100m,
+                QuantityOnHand = 5,
+                Version = 1,
+            };
+
+            _orderRepositoryMock.Setup(r => r.GetCustomerAsync(customerId)).ReturnsAsync(customer);
+
+            _orderRepositoryMock
+                .Setup(r => r.GetProductsAsync(It.IsAny<List<int>>()))
+                .ReturnsAsync(new List<Product> { product });
+
+            _orderRepositoryMock.Setup(r => r.BeginTransactionAsync()).Returns(Task.CompletedTask);
+
+            _orderRepositoryMock
+                .Setup(r => r.AddOrderAsync(It.IsAny<Order>()))
+                .ThrowsAsync(new InvalidOperationException("DB save failed"));
+
+            _orderRepositoryMock
+                .Setup(r => r.RollbackTransactionAsync())
+                .Returns(Task.CompletedTask);
+
+            var action = async () => await _orderService.CreateOrderAsync(request, customerId);
+
+            await action
+                .Should()
+                .ThrowAsync<InvalidOperationException>()
+                .WithMessage("DB save failed");
+
+            _orderRepositoryMock.Verify(r => r.RollbackTransactionAsync(), Times.Once);
+            _orderRepositoryMock.Verify(r => r.CommitTransactionAsync(), Times.Never);
+            _backgroundJobClientMock.Verify(
+                x => x.Create(It.IsAny<Job>(), It.IsAny<EnqueuedState>()),
+                Times.Never
+            );
         }
 
         [Fact]
@@ -557,145 +748,6 @@ namespace OIMS.Tests.Services
             result.TotalPages.Should().Be(3);
 
             _orderRepositoryMock.Verify(repo => repo.GetOrdersAsync(request, 5, null), Times.Once);
-        }
-
-        [Fact]
-        public async Task CreateOrderAsync_ShouldSucceedAndExecuteAllProjections_WhenDataIsValid()
-        {
-            QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
-
-            int customerId = 1;
-            var customer = new Customer
-            {
-                Id = customerId,
-                FirstName = "Clark",
-                LastName = "Kent",
-                Email = "clark@dailyplanet.com",
-            };
-
-            var request = new CreateOrderRequestDto
-            {
-                ShippingAddress = "344 Clinton St",
-                PaymentMethod = "Card",
-                Items = new List<CreateOrderItemRequestDto>
-                {
-                    new CreateOrderItemRequestDto { ProductId = 10, Quantity = 2 },
-                },
-            };
-
-            var product = new Product
-            {
-                Id = 10,
-                Name = "Desk Lamp",
-                SellingPrice = 25m,
-                QuantityOnHand = 10,
-                Version = 1,
-            };
-
-            _orderRepositoryMock.Setup(r => r.GetCustomerAsync(customerId)).ReturnsAsync(customer);
-
-            _orderRepositoryMock
-                .Setup(r => r.GetProductsAsync(It.IsAny<List<int>>()))
-                .ReturnsAsync(new List<Product> { product });
-
-            _orderRepositoryMock.Setup(r => r.BeginTransactionAsync()).Returns(Task.CompletedTask);
-
-            _orderRepositoryMock
-                .Setup(r => r.AddOrderAsync(It.IsAny<Order>()))
-                .Returns(Task.CompletedTask);
-
-            _orderRepositoryMock
-                .Setup(r => r.AddInventoryTransactionsAsync(It.IsAny<List<InventoryTransaction>>()))
-                .Returns(Task.CompletedTask);
-
-            _orderRepositoryMock
-                .Setup(r => r.AddOrderDocumentAsync(It.IsAny<OrderDocument>()))
-                .Returns(Task.CompletedTask);
-
-            _orderRepositoryMock
-                .Setup(r => r.AddAuditLogAsync(It.IsAny<AuditLog>()))
-                .Returns(Task.CompletedTask);
-
-            _orderRepositoryMock.Setup(r => r.SaveChangesAsync()).Returns(Task.CompletedTask);
-
-            _orderRepositoryMock.Setup(r => r.CommitTransactionAsync()).Returns(Task.CompletedTask);
-
-            var result = await _orderService.CreateOrderAsync(request, customerId);
-
-            result.Should().NotBeNull();
-            result.CustomerId.Should().Be(customerId);
-            result.Subtotal.Should().Be(50m);
-            result.TotalAmount.Should().Be(50m);
-            result.Items.Should().HaveCount(1);
-            result.Items[0].ProductId.Should().Be(10);
-            result.Items[0].ProductName.Should().Be("Desk Lamp");
-            result.Items[0].Quantity.Should().Be(2);
-            result.Items[0].UnitPrice.Should().Be(25m);
-            result.Items[0].LineTotal.Should().Be(50m);
-
-            product.QuantityOnHand.Should().Be(8);
-            product.Version.Should().Be(2);
-
-            _orderRepositoryMock.Verify(r => r.CommitTransactionAsync(), Times.Once);
-            _orderRepositoryMock.Verify(r => r.RollbackTransactionAsync(), Times.Never);
-        }
-
-        [Fact]
-        public async Task CreateOrderAsync_ShouldRollbackAndRethrow_WhenRepositoryFails()
-        {
-            int customerId = 1;
-            var customer = new Customer
-            {
-                Id = customerId,
-                FirstName = "Diana",
-                LastName = "Prince",
-                Email = "diana@themyscira.com",
-            };
-
-            var request = new CreateOrderRequestDto
-            {
-                ShippingAddress = "Gateway City",
-                PaymentMethod = "Card",
-                Items = new List<CreateOrderItemRequestDto>
-                {
-                    new CreateOrderItemRequestDto { ProductId = 20, Quantity = 1 },
-                },
-            };
-
-            var product = new Product
-            {
-                Id = 20,
-                Name = "Shield",
-                SellingPrice = 100m,
-                QuantityOnHand = 5,
-                Version = 1,
-            };
-
-            _orderRepositoryMock.Setup(r => r.GetCustomerAsync(customerId)).ReturnsAsync(customer);
-
-            _orderRepositoryMock
-                .Setup(r => r.GetProductsAsync(It.IsAny<List<int>>()))
-                .ReturnsAsync(new List<Product> { product });
-
-            _orderRepositoryMock.Setup(r => r.BeginTransactionAsync()).Returns(Task.CompletedTask);
-
-            _orderRepositoryMock
-                .Setup(r => r.AddOrderAsync(It.IsAny<Order>()))
-                .ThrowsAsync(new InvalidOperationException("DB save failed"));
-
-            _orderRepositoryMock
-                .Setup(r => r.RollbackTransactionAsync())
-                .Returns(Task.CompletedTask);
-
-            var action = async () => await _orderService.CreateOrderAsync(request, customerId);
-
-            await action
-                .Should()
-                .ThrowAsync<InvalidOperationException>()
-                .WithMessage("DB save failed");
-
-            _orderRepositoryMock.Verify(r => r.RollbackTransactionAsync(), Times.Once);
-            _orderRepositoryMock.Verify(r => r.CommitTransactionAsync(), Times.Never);
         }
     }
 }
